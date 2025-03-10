@@ -74,6 +74,8 @@ const openPopup = (indicator, tipe) => {
 </script>
 
 <template>
+
+    <el-button>button</el-button>
     <br />
     <div class="table">
         <table :class="props.role">
@@ -122,12 +124,15 @@ const openPopup = (indicator, tipe) => {
                         <td colspan="2">
                             <div class="edited">
                             <p>Last edited by: {{data.editorEval}}</p>
-                            <textarea
-                                class="ta"
-                                :disabled="data.bukti === ''"
-                                v-model="data.evaluasi"
-                                @input="data.isUpdate = true"
-                            ></textarea>
+                                <el-input
+                                    style="width: 240px"
+                                    :disabled="data.bukti === ''"
+                                    v-model="data.evaluasi"
+                                    @input="data.isUpdate = true"
+                                    :rows="2"
+                                    type="textarea"
+                                    placeholder="Please input"
+                                />
                             </div>
                         </td>
                         <td colspan="2">
