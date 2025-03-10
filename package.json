@@ -13,11 +13,13 @@
         "vite": "^5.0"
     },
     "dependencies": {
+        "@primeuix/themes": "^1.0.0",
         "@vueuse/core": "^10.11.0",
         "bootstrap": "^5.3.3",
         "bootstrap-vue": "^2.23.1",
         "ldrs": "^1.0.2",
         "lodash": "^4.17.21",
+        "primevue": "^4.3.1",
         "vue": "^3.4.33",
         "vue-loader": "^17.4.2",
         "vue-router": "^4.4.0",
