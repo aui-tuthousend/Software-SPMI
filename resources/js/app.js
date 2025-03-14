@@ -16,7 +16,10 @@ const appVue = createApp(app);
 appVue.use(router);
 appVue.use(PrimeVue, {
     theme: {
-        preset: Aura
+        preset: Aura,
+        options: {
+            darkModeSelector: false,
+        }
     }
 });
 appVue.use(ToastService);
