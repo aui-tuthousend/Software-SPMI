@@ -47,6 +47,10 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"npm run dev\" \"php artisan serve --port=8000\" \"php artisan queue:listen --tries=1\" --names='server,queue,vite'"
         ]
     },
     "extra": {

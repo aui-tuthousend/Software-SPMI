@@ -1,178 +1,223 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { zodResolver } from "@primevue/forms/resolvers/zod";
+import { z } from "zod";
+import { useToast } from "primevue/usetoast";
+import Toast from "primevue/toast";
+import { Form } from "@primevue/forms";
+import Button from "primevue/button";
+import Message from "primevue/message";
+import Select from "primevue/select";
 
 const router = useRouter();
-const name = ref('');
-const email = ref('');
-const password = ref('');
-const role = ref('');
+const toast = useToast();
+const loading = ref(false);
+const roles = ref([
+    { name: "Penetapan", value: "penetapan" },
+    { name: "Pelaksanaan", value: "pelaksanaan" },
+    { name: "Evaluasi", value: "evaluasi" },
+    { name: "Peningkatan", value: "peningkatan" },
+    { name: "Pengendalian", value: "pengendalian" },
+]);
+const initialValues = ref({
+    name: "",
+    email: "",
+    password: "",
+    role: "",
+});
 
-const register = async () => {
-    try {
-        const response = await axios.post('/api/register', {
-            name: name.value,
-            email: email.value,
-            password: password.value,
-            role: role.value,
-        });
-        console.log(response);
-        await router.push('/login');
-    } catch (error) {
-        alert(error);
-        console.error('Registration failed:', error);
+const resolver = zodResolver(
+    z.object({
+        name: z.string().min(1, { message: "Nama harus diisi." }),
+        email: z.string().email({ message: "Format email tidak valid." }),
+        password: z
+            .string()
+            .min(6, { message: "Password harus minimal 6 karakter." }),
+        role: z
+            .string()
+            .min(1, { message: "Silahkan pilih role terlebih dahulu." }),
+    })
+);
+
+const register = async (e) => {
+    if (e.valid) {
+        try {
+            loading.value = true;
+
+            const response = await axios.post("/api/register", {
+                name: e.values.name,
+                email: e.values.email,
+                password: e.values.password,
+                role: e.values.role,
+            });
+
+            loading.value = false;
+
+            localStorage.setItem("toastMessage", "Registrasi Berhasil!");
+            localStorage.setItem("toastSeverity", "success");
+
+            await router.push("/login");
+        } catch (error) {
+            loading.value = false;
+
+            let errorMessages = "";
+            const errors = error.response.data.errors;
+
+            if (typeof errors === "object" && errors !== null) {
+                errorMessages = Object.values(errors).flat().join(", ");
+            } else {
+                errorMessages = "Terjadi kesalahan, silakan coba lagi.";
+            }
+
+            toast.add({
+                severity: "error",
+                summary: `Registrasi Gagal: ${errorMessages}`,
+                life: 5000,
+            });
+        }
     }
 };
 </script>
 
 <template>
-    <div class="c1">
+    <div class="h-screen w-screen flex">
+        <Toast />
 
-        <div class="main">
-            <div class="main1">
-                <div class="ma">
-                    <h1>POWERED BY <br> CREATORS AROUND <br> THE WORLD.</h1>
-                </div>
-                <div class="mi">
-                    <img src="https://images.unsplash.com/photo-1722170529553-3d486ba8ffba?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyOXx8fGVufDB8fHx8fA%3D%3D" class="mii" alt="">
-                </div>
+        <!-- Bagian Kiri: Gambar -->
+        <div class="flex flex-col items-center justify-center w-1/2 bg-blue-400">
+            <div
+                class="items-center justify-center"
+            >
+                <Image
+                    src="/image/logo-white-itats-full.webp"
+                    alt="Login Image"
+                    class="w-80"
+                />
+                <span class="text-2xl text-white text-center font-bold"
+                    >LPMI - Lembaga Penjaminan Mutu Internal</span
+                >
             </div>
-            <div class="main2">
-                <div class="regis">
-                    <strong style="text-align:center;">Register</strong>
-                    <div>
-                        <h6>Name</h6>
-                        <input type="text" v-model="name" placeholder="Nama anda" required>
-                    </div>
-                    <div>
-                        <h6>Email</h6>
-                        <input type="text" v-model="email" placeholder="Email anda" required>
+        </div>
+
+        <!-- Bagian Kanan: Form Register -->
+        <div
+            class="w-full md:w-1/2 flex items-center justify-center p-10 bg-gray-100"
+        >
+            <div class="w-full max-w-md">
+                <h2 class="text-4xl font-bold text-gray-700 text-center">
+                    Register
+                </h2>
+                <p class="text-center text-gray-500 text-sm mb-8">
+                    Isi form di bawah ini untuk mendaftar.
+                </p>
+
+                <Form
+                    v-slot="$form"
+                    :initialValues="initialValues"
+                    :resolver="resolver"
+                    @submit="register"
+                    class="flex flex-col gap-5"
+                >
+                    <div class="flex flex-col gap-1">
+                        <label class="text-gray-600 font-semibold">Nama</label>
+                        <InputText
+                            name="name"
+                            type="text"
+                            placeholder="Masukkan nama"
+                            class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <Message
+                            v-if="$form.name?.invalid"
+                            severity="error"
+                            size="small"
+                            variant="simple"
+                        >
+                            {{ $form.name.error.message }}
+                        </Message>
                     </div>
 
-                    <div>
-                        <h6>Password</h6>
-                        <input type="password" v-model="password" placeholder="Minimaln 6 karakter" required>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-gray-600 font-semibold">Email</label>
+                        <InputText
+                            name="email"
+                            type="text"
+                            placeholder="Masukkan email"
+                            class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <Message
+                            v-if="$form.email?.invalid"
+                            severity="error"
+                            size="small"
+                            variant="simple"
+                        >
+                            {{ $form.email.error.message }}
+                        </Message>
                     </div>
-                    <div>
-                        <label for="">Role:</label>
-                        <select v-model="role">
-                            <option value="">Pilih Role</option>
-                            <option value="Evaluasi">Penetapan / Evaluasi</option>
-                            <option>Pelaksanaan</option>
-                            <option>Pengendalian</option>
-                            <option>Peningkatan</option>
-                            <option>SuperUser</option>
-                        </select>
 
-                        <div class="log btn" @click="register">Register</div>
-                            <div style="text-align:center;">
-                                <p>Already have an account ?
-                                    <router-link to="/login"> login </router-link>
-                                </p>
-                            </div>
-                        </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-gray-600 font-semibold"
+                            >Password</label
+                        >
+                        <Password
+                            name="password"
+                            placeholder="Masukkan password"
+                            :feedback="false"
+                            toggleMask
+                            fluid
+                        />
+                        <Message
+                            v-if="$form.password?.invalid"
+                            severity="error"
+                            size="small"
+                            variant="simple"
+                        >
+                            {{ $form.password.error.message }}
+                        </Message>
                     </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="text-gray-600 font-semibold">Role</label>
+                        <Select
+                            name="role"
+                            :options="roles"
+                            optionLabel="name"
+                            optionValue="value"
+                            placeholder="Pilih role"
+                            fluid
+                        />
+                        <Message
+                            v-if="$form.role?.invalid"
+                            severity="error"
+                            size="small"
+                            variant="simple"
+                            >{{ $form.role.error.message }}</Message
+                        >
+                    </div>
+
+                    <Button
+                        type="submit"
+                        label="Register"
+                        style="width: auto"
+                        severity="info"
+                        raised
+                    />
+                    <div class="-mt-3">
+                        <p class="text-gray-500 text-sm">
+                            Sudah punya akun?
+                            <router-link to="/login"
+                                ><span class="font-semibold text-sky-500"
+                                    >Silahkan login</span
+                                ></router-link
+                            >
+                        </p>
+                    </div>
+                </Form>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-
-
-img{
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    transition: opacity 0.3s ease-in-out;
-    object-fit: cover;
-}
-
-.c1{
-    padding: 3%;
-    position: absolute;
-    width: 100vw;
-    .main{
-        /* //margin-top: 3%; */
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-
-        .main1{
-            width: 48.5%;
-            height: 40rem;
-            border-radius: 2rem;
-
-            .ma{
-                width: 100%;
-                height: 65%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .mi{
-                width: 100%;
-                height: 35%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .mii{
-                width: 100%;
-                height: 100%;
-                background: black;
-                border-radius: 2rem;
-            }
-        }
-
-        .main2{
-            width: 48.5%;
-            height: 40rem;
-            display: flex;
-            border-radius: 2rem;
-            background-image: url("https://png.pngtree.com/background/20230618/original/pngtree-abstract-3d-render-in-lustrous-blue-metallic-hues-with-reflective-sheen-picture-image_3710911.jpg");
-            align-items: center;
-            justify-content: center;
-
-            .regis{
-                width: 60%;
-                height: 70%;
-                padding: 3%;
-                flex-direction: column;
-                background: white;
-                border-radius: 2rem;
-                display: flex;
-                gap: 1.3rem;
-            }
-
-            .log{
-                width: 100%;
-                height: 2rem;
-                background: black;
-                color: white;
-                border-radius: 10rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-top: 1.5rem;
-            }
-
-            input{
-                border: none;
-                border-bottom: 2px solid #000; /* Warna garis bawah */
-                padding: 5px;
-                outline: none;
-                width: 100%;
-
-                font-size: 1rem;
-            }
-        }
-    }
-}
-
+/* Styles remain unchanged */
 </style>
