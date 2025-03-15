@@ -5,7 +5,7 @@
                 <div class="text-sky-500 text-2xl font-bold">LPMI</div>
             </template>
             <template #center="{ item, props }">
-                <a v-ripple class="flex items-center" v-bind="props.action">
+                <a v-ripple class="flex items-center justify-center" v-bind="props.action">
                     <span>{{ item.label }}</span>
                 </a>
             </template>
@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Avatar, Menubar } from "primevue";
 
@@ -57,23 +57,30 @@ const logout = async () => {
     }
 };
 
-const items = ref([
-    {
-        label: "Home",
-        icon: "pi pi-home",
-        command: () => router.push("/"),
-    },
-    {
-        label: "Upload",
-        icon: "pi pi-cloud-upload",
-        command: () => router.push("/import"),
-    },
-    {
-        label: "Logout",
-        icon: "pi pi-sign-out",
-        command: logout,
-    },
-]);
+const items = computed(() => {
+    const baseItems = [
+        {
+            label: "Home",
+            icon: "pi pi-home",
+            command: () => router.push("/"),
+        },
+        {
+            label: "Logout",
+            icon: "pi pi-sign-out",
+            command: logout,
+        },
+    ];
+
+    if (localStorage.getItem("userRole") === "Evaluasi") {
+        baseItems.splice(1, 0, {
+            label: "Upload",
+            icon: "pi pi-cloud-upload",
+            command: () => router.push("/import"),
+        });
+    }
+
+    return baseItems;
+});
 </script>
 
 <style scoped>
