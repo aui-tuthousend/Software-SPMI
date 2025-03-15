@@ -28,14 +28,14 @@
             /*padding: 3rem;*/
         }
 
-        table,
-        th,
-        td {
-            border: 1px solid black;
-            text-align: center;
-            padding: 5px;
-            width: 2rem;
-        }
+        /*table,*/
+        /*th,*/
+        /*td {*/
+        /*    border: 1px solid black;*/
+        /*    text-align: center;*/
+        /*    padding: 5px;*/
+        /*    width: 2rem;*/
+        /*}*/
 
     button{
         border-style: none;
