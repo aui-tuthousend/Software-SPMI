@@ -14,11 +14,10 @@ const router = useRouter();
 const toast = useToast();
 const loading = ref(false);
 const roles = ref([
-    { name: "Penetapan", value: "penetapan" },
-    { name: "Pelaksanaan", value: "pelaksanaan" },
-    { name: "Evaluasi", value: "evaluasi" },
-    { name: "Peningkatan", value: "peningkatan" },
-    { name: "Pengendalian", value: "pengendalian" },
+    { name: "Pelaksanaan", value: "Pelaksanaan" },
+    { name: "Evaluasi", value: "Evaluasi" },
+    { name: "Peningkatan", value: "Peningkatan" },
+    { name: "Pengendalian", value: "Pengendalian" },
 ]);
 const initialValues = ref({
     name: "",

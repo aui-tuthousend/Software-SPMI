@@ -169,6 +169,16 @@ watchEffect(async () => {
             </div>
 
             <!-- Conditional rendering for empty data -->
+            <div v-else-if="selectedFaculty === null"
+                class="text-center text-lg text-gray-500 p-4 bg-white rounded-lg shadow-lg">
+                <p>Pilih Falkultas</p>
+            </div>
+
+            <div v-else-if="selectedMajor === null"
+                class="text-center text-lg text-gray-500 p-4 bg-white rounded-lg shadow-lg">
+                <p>Pilih Jurusan</p>
+            </div>
+
             <div v-else-if="per.length === 0"
                 class="text-center text-lg text-gray-500 p-4 bg-white rounded-lg shadow-lg">
                 <p>Sheet dengan jurusan {{ selectedMajor }} belum ada</p>
