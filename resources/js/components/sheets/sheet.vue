@@ -33,7 +33,7 @@ if (role !== null){
         let response = await fetch(`/api/getPenetapan/${jurusan.value}/${periode.value}/${currentSheet.value}/${current.value}`);
         standarData.value = await response.json();
         loading.value = false;
-        // console.log(standarData.value);
+        console.log(standarData.value);
     }, { immediate: true });
 }
 
@@ -113,7 +113,7 @@ onBeforeMount(() => {
                 @update="(data) => update = data"></Pelaksanaan>
             <evaluasi
                 v-else-if="role=== 'Evaluasi'"
-                :data="filtered"
+                :data="standarData"
                 :role="role"
                 @submit-data="submitData"
                 @update="(data) => update = data"></evaluasi>

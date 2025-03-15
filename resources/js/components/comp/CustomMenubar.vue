@@ -1,0 +1,88 @@
+<template>
+    <div class="p-5 max-w-full">
+        <Menubar :model="items" class="shadow-xl">
+            <template #start>
+                <div class="text-sky-500 text-2xl font-bold">LPMI</div>
+            </template>
+            <template #center="{ item, props }">
+                <a v-ripple class="flex items-center" v-bind="props.action">
+                    <span>{{ item.label }}</span>
+                </a>
+            </template>
+            <template #end>
+                <div class="flex items-center mr-2">
+                    <Avatar
+                        image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
+                        shape="circle"
+                    />
+                </div>
+            </template>
+        </Menubar>
+    </div>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { Avatar, Menubar } from "primevue";
+
+const router = useRouter();
+const token = localStorage.getItem("token");
+const user = localStorage.getItem("name");
+const loading = ref(false);
+
+const logout = async () => {
+    try {
+        loading.value = true;
+        const response = await axios.post(
+            "/api/logout",
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        loading.value = false;
+
+        if (response.data.success) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("userRole");
+            router.push("/login");
+        } else {
+            console.error("Logout failed");
+        }
+    } catch (error) {
+        console.error("Error during logout:", error);
+    }
+};
+
+const items = ref([
+    {
+        label: "Home",
+        icon: "pi pi-home",
+        command: () => router.push("/"),
+    },
+    {
+        label: "Upload",
+        icon: "pi pi-cloud-upload",
+        command: () => router.push("/import"),
+    },
+    {
+        label: "Logout",
+        icon: "pi pi-sign-out",
+        command: logout,
+    },
+]);
+</script>
+
+<style scoped>
+.navbar {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 15px;
+    background: whitesmoke;
+}
+</style>

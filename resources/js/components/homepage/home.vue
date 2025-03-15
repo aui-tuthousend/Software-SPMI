@@ -1,84 +1,41 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Homepage from "@/components/homepage/homepage.vue";
-import About from "@/components/homepage/about.vue";
-import { useRouter } from "vue-router";
+import Toast from "primevue/toast";
+import Import from "../upload/import.vue";
+import { useToast } from "primevue";
 
-const loading = ref(false);
-const token = localStorage.getItem("token");
-const user = localStorage.getItem("name");
+const toast = useToast();
 const page = ref("home");
-const router = useRouter();
 
-console.log(user)
+onMounted(() => {
+    const toastMessage = localStorage.getItem("toastMessage");
+    const toastSeverity = localStorage.getItem("toastSeverity");
 
-const logout = async () => {
-    try {
-        loading.value = true;
-        const response = await axios.post(
-            "/api/logout",
-            {},
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
-        loading.value = false;
-        console.log('respons: ',response);
+    if (toastMessage) {
+        toast.add({
+            severity: toastSeverity || "success",
+            summary: toastMessage,
+            life: 3000,
+        });
 
-        if (response.data.success) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("userRole");
-            router.push("/login");
-        } else {
-            console.error("Logout failed");
-        }
-    } catch (error) {
-        console.error("Error during logout:", error);
+        localStorage.removeItem("toastMessage");
+        localStorage.removeItem("toastSeverity");
     }
-};
+});
 </script>
 
 <template>
-<!--    <h1 v-if="token !== undefined">{{ token }}</h1>-->
-    <div class="c1">
-        <div class="topbar">
-            <h2>SPMI</h2>
-            <div class="menu">
-                <strong v-if="token === null">
-                    <router-link  to="/login">Login</router-link>
-                </strong>
-                <strong @click="page = 'home'">Home</strong>
-                <strong @click="page = 'about'">About</strong>
-            </div>
-
-            <strong v-if="token" class="login" @click="logout">Logout</strong>
-            <p class="usr">Halo {{user}}</p>
-
-        </div>
-
+    <div class="max-w-full">
+        <Toast />
         <div class="content">
             <Homepage v-if="page === 'home'" />
-            <About v-if="page === 'about'" />
+            <Import v-if="page === 'import'" />
         </div>
     </div>
-
-<!--    <Loading v-if="loading"/>-->
 </template>
 
 <style scoped>
-.c1 {
-    position: absolute;
-    width: 100vw;
-    /* //height: 200vh; */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 3%;
-    background: whitesmoke;
-}
-
 .topbar {
     width: 100%;
     height: 4rem;
@@ -118,7 +75,7 @@ const logout = async () => {
     padding: 3%;
 }
 
-.usr{
+.usr {
     position: relative;
     margin-left: 60%;
 }

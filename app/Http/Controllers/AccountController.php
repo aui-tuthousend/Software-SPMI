@@ -32,12 +32,11 @@ class AccountController extends Controller {
         ]);
 
         if ($validator->fails()) {
-            return error($validator->errors());
-
-//            return response()->json([
-//                'success' => false,
-//                'errors' => $validator->errors()
-//            ], 422);
+            // return error($validator->errors());
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $input = $request->all();
@@ -51,7 +50,7 @@ class AccountController extends Controller {
 
         return response()->json([
             'success' => 'true',
-            'message' => 'User ' . $input['name'] . ' created successfuly'
+            'message' => 'Registrasi berhasil. Silahkan login!'
         ]);
     }
 

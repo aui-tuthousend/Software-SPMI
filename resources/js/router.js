@@ -14,73 +14,82 @@ const router = createRouter({
         {
             path: '/',
             component: Home,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
             },
         },
         {
             path: '/sheet/:jurusan/:periode',
             name: 'Sheet',
             component: Sheet,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
             },
         },
         {
             path: '/superUser/:jurusan/:periode',
             name: 'SuperUser',
             component: SuperUser,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
             },
         },
         {
             path: '/import',
             component: Importexcel,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
             },
         },
         {
             path: '/login',
             component: Login,
-            beforeEnter: (to, from, next) => {
-                const token = localStorage.getItem("token");
-                if (token === null) {
-                    next();
-                } else {
-                    alert('anda sudah login 😊')
-                    next('/')
-                }
-            },
             meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
+                showMenubar: false
             },
         },
         {
             path: '/register',
             component: Register,
             meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
+                showMenubar: false
             },
         },
         {
             path: '/:pathMatch(.*)*',
             component: NotFound,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
-            },
         },
         {
             path: '/admin/dashboard',
             component: HomeAdmin,
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
+            },
         },
     ],
 })
