@@ -26,6 +26,7 @@ Route::get('/downloadSheet', [SheetController::class, 'downloadExcel']);
 
 Route::get('/getPenetapan/{jurusan}/{periode}/{tipePendidikan}/{tipe}', [SheetController::class, 'getPenetapan']);
 Route::get('/getPeriode/{jurusan}', [SheetController::class, 'getPeriode']);
+Route::get('/getAllSheet', [SheetController::class, 'getAllSheet']);
 
 Route::post('/submitPelaksanaan', [SheetController::class, 'submitPelaksanaan'])->middleware('auth:sanctum');
 Route::post('/submitEvaluasi', [EvaluasiController::class, 'submitEval'])->middleware('auth:sanctum');
