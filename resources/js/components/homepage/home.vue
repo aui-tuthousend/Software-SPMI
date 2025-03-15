@@ -120,6 +120,6 @@ const logout = async () => {
 
 .usr{
     position: relative;
-    margin-left: 60%;;
+    margin-left: 60%;
 }
 </style>
