@@ -54,8 +54,11 @@ const router = createRouter({
             component: Importexcel,
             beforeEnter: (to, from, next) => {
                 const token = localStorage.getItem("token");
+                const role = localStorage.getItem("userRole");
                 if (token === null) {
                     next('/login');
+                } else if (role !== "Evaluasi") {
+                    next('/')
                 } else {
                     next();
                 }
