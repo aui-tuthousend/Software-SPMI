@@ -13,7 +13,8 @@ import ToastService from 'primevue/toastservice';
 import Avatar from 'primevue/avatar';
 import { Form } from '@primevue/forms';
 import Image from 'primevue/image';
-import {Avatar, Menubar, AutoComplete, Column, ColumnGroup, DataTable, FloatLabel, Row, Select, Textarea} from "primevue";
+import Aura from '@primeuix/themes/aura';
+import {AutoComplete, Column, ColumnGroup, DataTable, FloatLabel, Row, Select, Textarea} from "primevue";
 
 
 const appVue = createApp(app);

@@ -120,6 +120,14 @@ watchEffect(async () => {
                 </div>
             </div>
         </div>
+        <div class="card">
+            <DataTable :value="products" removableSort tableStyle="min-width: 50rem">
+                <Column field="code" header="Code" sortable style="width: 25%"></Column>
+                <Column field="name" header="Name" sortable style="width: 25%"></Column>
+                <Column field="category" header="Category" sortable style="width: 25%"></Column>
+                <Column field="quantity" header="Quantity" sortable style="width: 25%"></Column>
+            </DataTable>
+        </div>
         <p v-if="token === null">Anda Belum <router-link to="/login">Login</router-link> 🫨</p>
         <div class="w-full max-w-4xl flex flex-col gap-4" v-else>
             <!-- Select for selecting faculty -->
