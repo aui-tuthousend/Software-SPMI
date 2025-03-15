@@ -18,6 +18,14 @@ const router = createRouter({
                 enterClass: 'animate__animated animate__fadeInLeft',
                 leaveClass: 'animate__animated animate__fadeOutRight'
             },
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
+            },
         },
         {
             path: '/sheet/:jurusan/:periode',
@@ -26,6 +34,14 @@ const router = createRouter({
             meta: {
                 enterClass: 'animate__animated animate__fadeInLeft',
                 leaveClass: 'animate__animated animate__fadeOutRight'
+            },
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
             },
         },
         {
@@ -36,6 +52,14 @@ const router = createRouter({
                 enterClass: 'animate__animated animate__fadeInLeft',
                 leaveClass: 'animate__animated animate__fadeOutRight'
             },
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
+            },
         },
         {
             path: '/import',
@@ -44,19 +68,18 @@ const router = createRouter({
                 enterClass: 'animate__animated animate__fadeInLeft',
                 leaveClass: 'animate__animated animate__fadeOutRight'
             },
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
+            },
         },
         {
             path: '/login',
             component: Login,
-            beforeEnter: (to, from, next) => {
-                const token = localStorage.getItem("token");
-                if (token === null) {
-                    next();
-                } else {
-                    alert('anda sudah login 😊')
-                    next('/')
-                }
-            },
             meta: {
                 enterClass: 'animate__animated animate__fadeInLeft',
                 leaveClass: 'animate__animated animate__fadeOutRight'
@@ -81,6 +104,14 @@ const router = createRouter({
         {
             path: '/admin/dashboard',
             component: HomeAdmin,
+            beforeEnter: (to, from, next) => {
+                const token = localStorage.getItem("token");
+                if (token === null) {
+                    next('/login');
+                } else {
+                    next();
+                }
+            },
         },
     ],
 })

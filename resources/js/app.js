@@ -25,7 +25,7 @@ appVue.use(PrimeVue, {
     }
 });
 appVue.use(ToastService);
-appVue.component(Form);
+appVue.component('Form', Form);
 appVue.component('Button', Button);
 appVue.component('Image', Image);
 appVue.component('InputText', InputText);

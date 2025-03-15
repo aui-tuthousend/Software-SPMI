@@ -1,16 +1,33 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Homepage from "@/components/homepage/homepage.vue";
 import About from "@/components/homepage/about.vue";
+import { useToast } from "primevue/usetoast";
+import Toast from "primevue/toast";
 import { useRouter } from "vue-router";
 
 const loading = ref(false);
+const toast = useToast();
 const token = localStorage.getItem("token");
 const user = localStorage.getItem("name");
 const page = ref("home");
 const router = useRouter();
 
-console.log(user)
+onMounted(() => {
+    const toastMessage = localStorage.getItem("toastMessage");
+    const toastSeverity = localStorage.getItem("toastSeverity");
+
+    if (toastMessage) {
+        toast.add({
+            severity: toastSeverity || "success",
+            summary: toastMessage,
+            life: 3000,
+        });
+
+        localStorage.removeItem("toastMessage");
+        localStorage.removeItem("toastSeverity");
+    }
+});
 
 const logout = async () => {
     try {
@@ -41,7 +58,7 @@ const logout = async () => {
 </script>
 
 <template>
-<!--    <h1 v-if="token !== undefined">{{ token }}</h1>-->
+    <Toast />
     <div class="c1">
         <div class="topbar">
             <h2>SPMI</h2>
@@ -75,7 +92,7 @@ const logout = async () => {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    //padding: 3%;
+    padding: 3%;
     background: whitesmoke;
 }
 
