@@ -4,7 +4,8 @@ import XlsxTable from "./XlsxTable.vue";
 import XlsxSheets from "./XlsxSheets.vue";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
-import axios from 'axios';
+import axios from "axios";
+import { Button } from "primevue";
 
 const router = useRouter();
 const file = ref(null);
@@ -20,16 +21,22 @@ const showMajorError = ref(false);
 const departments = [
     {
         name: "F. Teknologi Industri",
-        majors: ["Teknik Mesin", "Teknik Industri", "Teknik Kimia", "Teknik Pertambangan", "Teknik Perkapalan"]
+        majors: [
+            "Teknik Mesin",
+            "Teknik Industri",
+            "Teknik Kimia",
+            "Teknik Pertambangan",
+            "Teknik Perkapalan",
+        ],
     },
     {
         name: "F. Teknik Sipil & Perencanaan",
-        majors: ["Teknik Sipil", "Arsitektur", "Teknik Lingkungan"]
+        majors: ["Teknik Sipil", "Arsitektur", "Teknik Lingkungan"],
     },
     {
         name: "F. Teknik Elektro dan Teknologi Informasi",
-        majors: ["Teknik Elektro", "Teknik Informatika", "Sistem Informasi"]
-    }
+        majors: ["Teknik Elektro", "Teknik Informatika", "Sistem Informasi"],
+    },
 ];
 
 const validateMajorSelection = () => {
@@ -55,16 +62,16 @@ const submitData = async () => {
     formData.append("note", note.value);
 
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         const response = await axios.post("api/penetapan/import", formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
-                "Authorization": `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
             },
         });
         if (response.data.success) {
             alert(response.data.message);
-            router.push('/');
+            router.push("/");
         } else {
             alert("Error: " + response.data.message);
         }
@@ -87,32 +94,39 @@ function generateYearRange() {
 const downloadFile = async () => {
     try {
         const response = await axios({
-            url: '/api/downloadSheet',
-            method: 'GET',
-            responseType: 'blob',
+            url: "/api/downloadSheet",
+            method: "GET",
+            responseType: "blob",
         });
 
         const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.setAttribute('download', 'TemplatePenetapan.xlsx'); // Nama file saat diunduh
+        link.setAttribute("download", "TemplatePenetapan.xlsx"); // Nama file saat diunduh
         document.body.appendChild(link);
         link.click();
         link.remove();
     } catch (error) {
-        console.error('Download failed:', error.response.data);
+        console.error("Download failed:", error.response.data);
     }
 };
 </script>
 
 <template>
-    <div class="c1">
-        <div v-if="loading" class="loading-overlay">
-        <l-dot-stream size="60" speed="2.5" color="black"></l-dot-stream>
-    </div>
     <div class="container">
-        <div class="upload-section">
-            <button class="bt" @click="downloadFile">Download Template</button>
+        <div class="upload-section bg-white">
+            <div>
+                <Button
+                    label="Template"
+                    severity="secondary"
+                    type="button"
+                    class="bt p-button-outlined"
+                    icon="pi pi-download"
+                    style="width: auto"
+                    @click="downloadFile"
+                />
+                <i class=""></i>
+            </div>
             <h2>Tambah/ Unggah Berkas</h2>
             <form @submit.prevent="submitData">
                 <div class="form-group">
@@ -128,24 +142,50 @@ const downloadFile = async () => {
                     />
                 </div>
                 <div class="form-group">
-                    <label for="department">Fakultas <span class="required">*</span></label>
-                    <select id="department" v-model="department" @change="validateMajorSelection" required>
+                    <label for="department"
+                        >Fakultas <span class="required">*</span></label
+                    >
+                    <select
+                        id="department"
+                        v-model="department"
+                        @change="validateMajorSelection"
+                        required
+                    >
                         <option value="">Pilih Fakultas</option>
-                        <option v-for="dept in departments" :key="dept.name" :value="dept.name">
+                        <option
+                            v-for="dept in departments"
+                            :key="dept.name"
+                            :value="dept.name"
+                        >
                             {{ dept.name }}
                         </option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="major">Jurusan <span class="required">*</span></label>
-                    <select id="major" v-model="selectedMajor" :disabled="!department" required>
+                    <label for="major"
+                        >Jurusan <span class="required">*</span></label
+                    >
+                    <select
+                        id="major"
+                        v-model="selectedMajor"
+                        :disabled="!department"
+                        required
+                    >
                         <option value="">Pilih Jurusan</option>
-                        <option v-for="major in departments.find(d => d.name === department)?.majors" :key="major" :value="major">
+                        <option
+                            v-for="major in departments.find(
+                                (d) => d.name === department
+                            )?.majors"
+                            :key="major"
+                            :value="major"
+                        >
                             {{ major }}
                         </option>
                     </select>
                     <div v-if="showMajorError" class="error-message">
-                        <span style="color: red;">Silakan pilih fakultas terlebih dahulu.</span>
+                        <span style="color: red"
+                            >Silakan pilih fakultas terlebih dahulu.</span
+                        >
                     </div>
                 </div>
                 <div class="form-group">
@@ -179,7 +219,9 @@ const downloadFile = async () => {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="note">Catatan <span class="required">*</span></label>
+                    <label for="note"
+                        >Catatan <span class="required">*</span></label
+                    >
                     <textarea
                         id="note"
                         v-model="note"
@@ -187,10 +229,17 @@ const downloadFile = async () => {
                         placeholder="Masukkan catatan jika ada"
                     ></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Kirim</button>
+                <div class="text-right">
+                    <Button
+                        type="submit"
+                        label="Upload"
+                        severity="contrast"
+                        style="width: auto"
+                    />
+                </div>
             </form>
         </div>
-        <div class="preview-section">
+        <div class="preview-section bg-white">
             <h3>Pratinjau Berkas</h3>
             <xlsx-read :file="file">
                 <template #default="{ loading }">
@@ -231,17 +280,10 @@ const downloadFile = async () => {
             </xlsx-read>
         </div>
     </div>
-    </div>
 </template>
 
 <style scoped>
-.c1{
-    position: absolute;
-    width: 100vw;
-    padding: 3%;
-}
-
-.bt{
+.bt {
     width: 10rem;
     margin-bottom: 1rem;
 }
@@ -255,12 +297,7 @@ const downloadFile = async () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(
-        197,
-        197,
-        197,
-        0.1
-    );
+    background: rgba(197, 197, 197, 0.1);
     backdrop-filter: blur(2px);
     z-index: 999;
 }
@@ -302,13 +339,6 @@ textarea {
 
 .required {
     color: red;
-}
-
-.navbar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background-color: white;
 }
 
 .preview-section {

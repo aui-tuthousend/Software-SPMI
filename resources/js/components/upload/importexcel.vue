@@ -94,7 +94,6 @@ export default {
             });
 
             this.groupedRows = this.rows.map(row => row.filter(cell => !cell.hidden));
-            console.log("Processed Rows:", this.groupedRows); // Debug output
         },
         exportToExcel() {
             const worksheet = XLSX.utils.aoa_to_sheet(this.rows.map(row => row.map(cell => cell.value)));
@@ -137,7 +136,6 @@ export default {
 
 body {
     width: 100vw;
-    //overflow-x: hidden;
     padding: 3rem;
 }
 

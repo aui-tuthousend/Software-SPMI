@@ -15,7 +15,6 @@
 
 <body>
 <div id="app" class="app">
-    <br>
 </div>
 
 <div id="modal" class="Modal">

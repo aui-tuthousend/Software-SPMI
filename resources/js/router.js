@@ -14,10 +14,6 @@ const router = createRouter({
         {
             path: '/',
             component: Home,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
-            },
             beforeEnter: (to, from, next) => {
                 const token = localStorage.getItem("token");
                 if (token === null) {
@@ -31,10 +27,6 @@ const router = createRouter({
             path: '/sheet/:jurusan/:periode',
             name: 'Sheet',
             component: Sheet,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
-            },
             beforeEnter: (to, from, next) => {
                 const token = localStorage.getItem("token");
                 if (token === null) {
@@ -48,10 +40,6 @@ const router = createRouter({
             path: '/superUser/:jurusan/:periode',
             name: 'SuperUser',
             component: SuperUser,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
-            },
             beforeEnter: (to, from, next) => {
                 const token = localStorage.getItem("token");
                 if (token === null) {
@@ -64,10 +52,6 @@ const router = createRouter({
         {
             path: '/import',
             component: Importexcel,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
-            },
             beforeEnter: (to, from, next) => {
                 const token = localStorage.getItem("token");
                 if (token === null) {
@@ -81,25 +65,19 @@ const router = createRouter({
             path: '/login',
             component: Login,
             meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
+                showMenubar: false
             },
         },
         {
             path: '/register',
             component: Register,
             meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
+                showMenubar: false
             },
         },
         {
             path: '/:pathMatch(.*)*',
             component: NotFound,
-            meta: {
-                enterClass: 'animate__animated animate__fadeInLeft',
-                leaveClass: 'animate__animated animate__fadeOutRight'
-            },
         },
         {
             path: '/admin/dashboard',

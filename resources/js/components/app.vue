@@ -1,7 +1,14 @@
 <script setup>
+import CustomMenubar from './comp/CustomMenubar.vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+
 </script>
 
 <template>
+    <div class="bg-gray-100 max-w-full">
+    <CustomMenubar v-if="route.meta.showMenubar !== false" />
         <RouterView v-slot="{ Component, route }">
             <transition
                 :enter-active-class="route.meta.enterClass"
@@ -10,6 +17,7 @@
                 <component :is="Component"/>
             </transition>
         </RouterView>
+    </div>
 </template>
 
 <style>
