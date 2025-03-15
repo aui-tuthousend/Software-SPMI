@@ -4,7 +4,6 @@ import app from './components/app.vue';
 import router from "./router";
 import 'primeicons/primeicons.css';
 import PrimeVue from 'primevue/config';
-import Aura from '@primeuix/themes/aura';
 import Button from "primevue/button"
 import Dropdown from "primevue/dropdown";
 import InputText from 'primevue/inputtext';
@@ -13,7 +12,7 @@ import ToastService from 'primevue/toastservice';
 import Aura from '@primeuix/themes/aura';
 import { Form } from '@primevue/forms';
 import Image from 'primevue/image';
-import {AutoComplete, Column, ColumnGroup, DataTable, FloatLabel, Row, Select, Textarea} from "primevue";
+import {Avatar, Menubar, AutoComplete, Column, ColumnGroup, DataTable, FloatLabel, Row, Select, Textarea} from "primevue";
 
 
 const appVue = createApp(app);
