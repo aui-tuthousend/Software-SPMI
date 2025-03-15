@@ -42,7 +42,8 @@ const selectedFaculty = ref(null); // Selected faculty
 const selectedMajor = ref(null); // Selected major
 const majors = ref([]); // List of majors for the selected faculty
 const loading = ref(false); // Loading state
-const per = ref([{ periode: "2023" }, { periode: "2024" }]); // Placeholder for period data
+// const per = ref([{ periode: "2023" }, { periode: "2024" }]); // Placeholder for period data
+const per = ref([]); // Placeholder for period data
 const periode = ref(null); // Selected period
 // const role = ref("User"); // User role (change to "SuperUser" if needed)
 

@@ -5,6 +5,7 @@ import XlsxSheets from "./XlsxSheets.vue";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import axios from 'axios';
+import { FileUpload, Select } from "primevue";
 
 const router = useRouter();
 const file = ref(null);
@@ -108,140 +109,111 @@ const downloadFile = async () => {
 <template>
     <div class="c1">
         <div v-if="loading" class="loading-overlay">
-        <l-dot-stream size="60" speed="2.5" color="black"></l-dot-stream>
-    </div>
-    <div class="container">
-        <div class="upload-section">
-            <button class="bt" @click="downloadFile">Download Template</button>
-            <h2>Tambah/ Unggah Berkas</h2>
-            <form @submit.prevent="submitData">
-                <div class="form-group">
-                    <label for="file-upload"
-                        >Pilih berkas <span class="required">*</span></label
-                    >
-                    <input
-                        class="form-control"
-                        type="file"
-                        id="file-upload"
-                        @change="handleFileChange"
-                        required
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="department">Fakultas <span class="required">*</span></label>
-                    <select id="department" v-model="department" @change="validateMajorSelection" required>
-                        <option value="">Pilih Fakultas</option>
-                        <option v-for="dept in departments" :key="dept.name" :value="dept.name">
-                            {{ dept.name }}
-                        </option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="major">Jurusan <span class="required">*</span></label>
-                    <select id="major" v-model="selectedMajor" :disabled="!department" required>
-                        <option value="">Pilih Jurusan</option>
-                        <option v-for="major in departments.find(d => d.name === department)?.majors" :key="major" :value="major">
-                            {{ major }}
-                        </option>
-                    </select>
-                    <div v-if="showMajorError" class="error-message">
-                        <span style="color: red;">Silakan pilih fakultas terlebih dahulu.</span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="type"
-                        >Tipe <span class="required">*</span></label
-                    >
-                    <select id="type" v-model="type" required>
-                        <option value="">Pilih Tipe</option>
-                        <option value="pendidikan">Pendidikan</option>
-                        <option value="penelitian">Penelitian</option>
-                        <option value="pengabdian">Pengabdian</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="period"
-                        >Periode <span class="required">*</span></label
-                    >
-                    <select id="period" v-model="period" required>
-                        <option value="">Pilih Periode</option>
-                        <template
-                            v-for="year in generateYearRange()"
-                            :key="year"
-                        >
-                            <option :value="`${year}-${year + 1} Ganjil`">
-                                {{ `${year}-${year + 1} Ganjil` }}
-                            </option>
-                            <option :value="`${year}-${year + 1} Genap`">
-                                {{ `${year}-${year + 1} Genap` }}
-                            </option>
-                        </template>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="note">Catatan <span class="required">*</span></label>
-                    <textarea
-                        id="note"
-                        v-model="note"
-                        rows="4"
-                        placeholder="Masukkan catatan jika ada"
-                    ></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Kirim</button>
-            </form>
+            <l-dot-stream size="60" speed="2.5" color="black"></l-dot-stream>
         </div>
-        <div class="preview-section">
-            <h3>Pratinjau Berkas</h3>
-            <xlsx-read :file="file">
-                <template #default="{ loading }">
-                    <span v-if="loading">Memuat...</span>
-                    <xlsx-sheets>
-                        <template #default="{ sheets }">
-                            <nav class="navbar">
-                                <ul class="navbar-nav">
-                                    <li
-                                        class="nav-item"
-                                        v-for="sheet in sheets"
-                                        :key="sheet"
-                                    >
-                                        <a
-                                            class="nav-link"
-                                            :class="{
+        <div class="container">
+            <div class="upload-section">
+                <!-- Download Template Button -->
+                <Button label="Download Template"
+                    class="p-button-outlined mb-4 px-6 py-3 rounded-lg border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-300 ease-in-out"
+                    @click="downloadFile" />
+
+                <h2>Tambah/ Unggah Berkas</h2>
+
+                <!-- Form -->
+                <form @submit.prevent="submitData">
+                    <!-- File Upload -->
+                    <div class="form-group">
+                        <label for="file-upload">Pilih berkas <span class="required">*</span></label>
+                        <FileUpload mode="basic" name="file-upload" @change="handleChange" :auto="true"
+                            @uploader="handleFileChange" chooseLabel="Pilih Berkas" class="w-full" required />
+                    </div>
+
+                    <!-- Department Select -->
+                    <div class="form-group">
+                        <label for="department">Fakultas <span class="required">*</span></label>
+                        <Select v-model="department" :options="departments" optionLabel="name"
+                            placeholder="Pilih Fakultas" class="w-full" :filter="true" :showClear="true"
+                            @change="validateMajorSelection" required />
+                    </div>
+
+                    <!-- Major Select -->
+                    <div class="form-group">
+                        <label for="major">Jurusan <span class="required">*</span></label>
+                        <Select v-model="selectedMajor"
+                            :options="departments.find(d => d.name === department)?.majors || []"
+                            placeholder="Pilih Jurusan" class="w-full" :filter="true" :showClear="true"
+                            :disabled="!department" required />
+                        <div v-if="showMajorError" class="error-message">
+                            <span style="color: red;">Silakan pilih fakultas terlebih dahulu.</span>
+                        </div>
+                    </div>
+
+                    <!-- Type Select -->
+                    <div class="form-group">
+                        <label for="type">Tipe <span class="required">*</span></label>
+                        <Select v-model="type" :options="typeOptions" placeholder="Pilih Tipe" class="w-full"
+                            :filter="true" :showClear="true" required />
+                    </div>
+
+                    <!-- Period Select -->
+                    <div class="form-group">
+                        <label for="period">Periode <span class="required">*</span></label>
+                        <Select v-model="period" :options="generateYearRange()" placeholder="Pilih Periode"
+                            class="w-full" :filter="true" :showClear="true" required />
+                    </div>
+
+                    <!-- Note Textarea -->
+                    <div class="form-group">
+                        <label for="note">Catatan <span class="required">*</span></label>
+                        <Textarea v-model="note" rows="4" placeholder="Masukkan catatan jika ada" class="w-full" />
+                    </div>
+
+                    <!-- Submit Button -->
+                    <Button type="submit" label="Kirim" class="p-button-primary mt-4" />
+                </form>
+            </div>
+            <div class="preview-section">
+                <h3>Pratinjau Berkas</h3>
+                <xlsx-read :file="file">
+                    <template #default="{ loading }">
+                        <span v-if="loading">Memuat...</span>
+                        <xlsx-sheets>
+                            <template #default="{ sheets }">
+                                <nav class="navbar">
+                                    <ul class="navbar-nav">
+                                        <li class="nav-item" v-for="sheet in sheets" :key="sheet">
+                                            <a class="nav-link" :class="{
                                                 active: selectedSheet === sheet,
-                                            }"
-                                            href="#"
-                                            @click="selectedSheet = sheet"
-                                            :style="{
+                                            }" href="#" @click="selectedSheet = sheet" :style="{
                                                 backgroundColor:
                                                     selectedSheet === sheet
                                                         ? '#94b6ff'
                                                         : '',
-                                            }"
-                                            >{{ sheet }}</a
-                                        >
-                                    </li>
-                                </ul>
-                            </nav>
-                        </template>
-                    </xlsx-sheets>
-                    <div class="xlsx-table">
-                        <xlsx-table :sheet="selectedSheet" />
-                    </div>
-                </template>
-            </xlsx-read>
+                                            }">{{ sheet }}</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </template>
+                        </xlsx-sheets>
+                        <div class="xlsx-table">
+                            <xlsx-table :sheet="selectedSheet" />
+                        </div>
+                    </template>
+                </xlsx-read>
+            </div>
         </div>
-    </div>
     </div>
 </template>
 
 <style scoped>
-.c1{
+.c1 {
     position: absolute;
     width: 100vw;
     padding: 3%;
 }
 
-.bt{
+.bt {
     width: 10rem;
     margin-bottom: 1rem;
 }
@@ -255,12 +227,10 @@ const downloadFile = async () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(
-        197,
-        197,
-        197,
-        0.1
-    );
+    background: rgba(197,
+            197,
+            197,
+            0.1);
     backdrop-filter: blur(2px);
     z-index: 999;
 }
@@ -271,6 +241,7 @@ const downloadFile = async () => {
     align-items: flex-start;
     padding: 20px;
 }
+
 .upload-section,
 .preview-section {
     height: fit-content;
@@ -320,6 +291,7 @@ textarea {
     overflow-x: auto;
     max-height: 450px;
 }
+
 ::-webkit-scrollbar {
     width: 5px;
 }
