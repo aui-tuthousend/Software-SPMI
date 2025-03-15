@@ -257,10 +257,7 @@ const downloadFile = async () => {
                                             class="nav-link"
                                             :class="{
                                                 active: selectedSheet === sheet,
-                                            }"
-                                            href="#"
-                                            @click="selectedSheet = sheet"
-                                            :style="{
+                                            }" href="#" @click="selectedSheet = sheet" :style="{
                                                 backgroundColor:
                                                     selectedSheet === sheet
                                                         ? '#94b6ff'
@@ -308,6 +305,7 @@ const downloadFile = async () => {
     align-items: flex-start;
     padding: 20px;
 }
+
 .upload-section,
 .preview-section {
     height: fit-content;
@@ -350,6 +348,7 @@ textarea {
     overflow-x: auto;
     max-height: 450px;
 }
+
 ::-webkit-scrollbar {
     width: 5px;
 }

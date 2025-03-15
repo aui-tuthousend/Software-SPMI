@@ -7,12 +7,14 @@ import PrimeVue from 'primevue/config';
 import Button from "primevue/button"
 import Dropdown from "primevue/dropdown";
 import InputText from 'primevue/inputtext';
+import Menubar from 'primevue/menubar';
 import Password from 'primevue/password';
 import ToastService from 'primevue/toastservice';
-import Aura from '@primeuix/themes/aura';
+import Avatar from 'primevue/avatar';
 import { Form } from '@primevue/forms';
 import Image from 'primevue/image';
-import {Avatar, Menubar, AutoComplete, Column, ColumnGroup, DataTable, FloatLabel, Row, Select, Textarea} from "primevue";
+import Aura from '@primeuix/themes/aura';
+import {AutoComplete, Column, ColumnGroup, DataTable, FloatLabel, Row, Select, Textarea} from "primevue";
 
 
 const appVue = createApp(app);

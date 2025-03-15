@@ -13,6 +13,7 @@ use App\Models\Peningkatan;
 use App\Models\Sheet;
 use App\Models\Standar;
 use App\Models\Target;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
@@ -22,16 +23,16 @@ class SheetController extends Controller {
     public function indexSheet() {
         $data = Sheet::all();
         $responseData = SheetResource::collection($data);
-        return $this->sendRespons($responseData,'all sheet data');
+        return $this->sendRespons($responseData, 'all sheet data');
     }
 
-    public function getPenetapan($jurusan, $periode, $tipePendidikan, $tipe){
+    public function getPenetapan($jurusan, $periode, $tipePendidikan, $tipe) {
         $sheets = Sheet::where('jurusan', '=', $jurusan)
-                       ->where('periode', '=', $periode)
-                       ->where('tipe_sheet', '=', $tipePendidikan)
-                       ->get();
+            ->where('periode', '=', $periode)
+            ->where('tipe_sheet', '=', $tipePendidikan)
+            ->get();
 
-        if ($sheets->isEmpty()){
+        if ($sheets->isEmpty()) {
             return response()->json("Null");
         }
 
@@ -54,11 +55,11 @@ class SheetController extends Controller {
                         'indicators' => []
                     ];
 
-                    foreach ($indikator as $i){
-                        if ($i->id_standar == $s->id){
+                    foreach ($indikator as $i) {
+                        if ($i->id_standar == $s->id) {
                             $tar = null;
-                            foreach ($target as $t){
-                                if ($t->id_indikator == $i->id){
+                            foreach ($target as $t) {
+                                if ($t->id_indikator == $i->id) {
                                     $tar = $t;
                                 }
                             }
@@ -78,16 +79,16 @@ class SheetController extends Controller {
                             $pelaksanaan_rtl = '';
                             $pengendalianEditor = '';
                             $idPeningkatan = '';
-                            $komenPeningkatan='';
+                            $komenPeningkatan = '';
                             $peningkatanEditor = '';
-                            foreach ($bukti as $b){
-                                if ($b->id_indikator == $i->id){
+                            foreach ($bukti as $b) {
+                                if ($b->id_indikator == $i->id) {
                                     $buk = $b->komentar;
                                     $idB = $b->id;
                                     $pelaksanaanEditor = $b->edited_by;
 
                                     foreach ($buktieval as $e) {
-                                        if ($e->id_bukti_pelaksanaan == $b->id){
+                                        if ($e->id_bukti_pelaksanaan == $b->id) {
                                             $idBE = $e->id;
                                             $eva = $e->komentar;
                                             $adj = $e->adjustment;
@@ -95,7 +96,7 @@ class SheetController extends Controller {
                                             $evalEditor = $e->edited_by;
 
                                             foreach ($buktiPengendalian as $bp) {
-                                                if ($bp->id_bukti_evaluasi == $e->id){
+                                                if ($bp->id_bukti_evaluasi == $e->id) {
                                                     $idBPengendalian = $bp->id;
                                                     $temuan = $bp->temuan;
                                                     $akar_masalah = $bp->akar_masalah;
@@ -103,8 +104,8 @@ class SheetController extends Controller {
                                                     $pelaksanaan_rtl = $bp->pelaksanaan_rtl;
                                                     $pengendalianEditor = $bp->edited_by;
 
-                                                    foreach ($buktiPeningkatan as $p){
-                                                        if ($p->id_pengendalian == $bp->id){
+                                                    foreach ($buktiPeningkatan as $p) {
+                                                        if ($p->id_pengendalian == $bp->id) {
                                                             $idPeningkatan = $p->id;
                                                             $komenPeningkatan = $p->komentar;
                                                             $peningkatanEditor = $p->edited_by;
@@ -120,28 +121,28 @@ class SheetController extends Controller {
                             }
 
                             $newIndicator = [
-                                'idPelaksanaan'    =>$shiit->id,
-                                'id'               => $i->id,
-                                'indicator'        => $i->note,
-                                'target'           => $tar->value,
-                                'idBukti'          => $idB,
-                                'bukti'            => $buk,
-                                'editorPelaksanaan'=> $pelaksanaanEditor,
-                                'idEvaluasi'       => $idE,
-                                'idBuktiEval'      => $idBE,
-                                'evaluasi'         => $eva,
-                                'adjusment'        => $adj,
-                                'editorEval'       => $evalEditor,
-                                'idBPengendalian'  => $idBPengendalian,
-                                'temuan'           => $temuan,
-                                'akar_masalah'     => $akar_masalah,
-                                'rtl'              => $rtl,
-                                'pelaksanaan_rtl'  => $pelaksanaan_rtl,
+                                'idPelaksanaan' => $shiit->id,
+                                'id' => $i->id,
+                                'indicator' => $i->note,
+                                'target' => $tar->value,
+                                'idBukti' => $idB,
+                                'bukti' => $buk,
+                                'editorPelaksanaan' => $pelaksanaanEditor,
+                                'idEvaluasi' => $idE,
+                                'idBuktiEval' => $idBE,
+                                'evaluasi' => $eva,
+                                'adjusment' => $adj,
+                                'editorEval' => $evalEditor,
+                                'idBPengendalian' => $idBPengendalian,
+                                'temuan' => $temuan,
+                                'akar_masalah' => $akar_masalah,
+                                'rtl' => $rtl,
+                                'pelaksanaan_rtl' => $pelaksanaan_rtl,
                                 'editorPengendali' => $pengendalianEditor,
-                                'idPeningkatan'    => $idPeningkatan,
+                                'idPeningkatan' => $idPeningkatan,
                                 'komenPeningkatan' => $komenPeningkatan,
-                                'editorPeningkatan'=> $peningkatanEditor,
-                                'isUpdate'           => false,
+                                'editorPeningkatan' => $peningkatanEditor,
+                                'isUpdate' => false,
                             ];
                             array_push($data['indicators'], $newIndicator);
                         }
@@ -155,44 +156,52 @@ class SheetController extends Controller {
         return response()->json($respond);
     }
 
-    public function getPeriode($jurusan)
-    {
+    public function getPeriode($jurusan) {
         $sheets = Sheet::where('jurusan', $jurusan)->get()->unique('periode');
         // $responseData = new SheetResource($sheets);
         return response()->json($sheets);
     }
 
-    public function submitPelaksanaan(Request $request){
+    public function getAllSheet() {
+        $sheets = Sheet::all();
+        $responseData = SheetResource::collection($sheets);
+        if ($sheets->isEmpty()) {
+            return response()->json(['message' => 'Data not found'], 404);
+        }
+        return response()->json($responseData, 200);
+    }
+
+    public function submitPelaksanaan(Request $request) {
         $item = $request->input('data');
 
-            $idIndikator = $item['idIndikator'];
-            $bukti = $item['bukti'];
-            $idPelaksanaan = $item['idPelaksanaan'];
-            $userName = $item['userName'];
+        $idIndikator = $item['idIndikator'];
+        $bukti = $item['bukti'];
+        $idPelaksanaan = $item['idPelaksanaan'];
+        $userName = $item['userName'];
 
-            $buktiPelaksanaan = BuktiPelaksanaan::where('id_indikator', $idIndikator)->first();
+        $buktiPelaksanaan = BuktiPelaksanaan::where('id_indikator', $idIndikator)->first();
 
-            if ($buktiPelaksanaan) {
-                if ($bukti !== null) {
-                    $buktiPelaksanaan->komentar = $bukti;
-                    $buktiPelaksanaan->edited_by = $userName;
-                    $buktiPelaksanaan->save();
-                }
-            } else {
-                if ($bukti !== null) {
-                    BuktiPelaksanaan::create([
-                        'id_pelaksanaan' => $idPelaksanaan,
-                        'id_indikator' => $idIndikator,
-                        'komentar' => $bukti,
-                        'edited_by' => $userName,
-                    ]);
-                }
+        if ($buktiPelaksanaan) {
+            if ($bukti !== null) {
+                $buktiPelaksanaan->komentar = $bukti;
+                $buktiPelaksanaan->edited_by = $userName;
+                $buktiPelaksanaan->save();
             }
+        } else {
+            if ($bukti !== null) {
+                BuktiPelaksanaan::create([
+                    'id_pelaksanaan' => $idPelaksanaan,
+                    'id_indikator' => $idIndikator,
+                    'komentar' => $bukti,
+                    'edited_by' => $userName,
+                ]);
+            }
+        }
 
         return response('all good');
     }
 
-    public function downloadExcel(){
+    public function downloadExcel() {
         return response()->download(storage_path('../dokumentasi/example.xlsx'));
     }
 }
