@@ -17,6 +17,7 @@ class SheetResource extends JsonResource {
             "id" => $this->id,
             "jurusan" => $this->jurusan,
             "periode" => $this->periode,
+            "tipe" => $this->tipe_sheet,
             "note" => $this->note,
         ];
     }

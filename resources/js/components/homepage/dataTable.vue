@@ -1,32 +1,33 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { FilterMatchMode } from "@primevue/core";
 
 const router = useRouter();
-
-// Data
-const sheetData = ref([
-    { faculty: "F. Teknologi Industri", major: "Teknik Mesin", period: "2023" },
-    { faculty: "F. Teknologi Industri", major: "Teknik Industri", period: "2023" },
-    { faculty: "F. Teknologi Industri", major: "Teknik Kimia", period: "2022" },
-    { faculty: "F. Teknik Sipil & Perencanaan", major: "Teknik Sipil", period: "2023" },
-    { faculty: "F. Teknik Sipil & Perencanaan", major: "Arsitektur", period: "2022" },
-    { faculty: "F. Teknik Elektro dan Teknologi Informasi", major: "Teknik Elektro", period: "2023" },
-    { faculty: "F. Teknik Elektro dan Teknologi Informasi", major: "Teknik Informatika", period: "2022" },
-    { faculty: "F. Teknik Elektro dan Teknologi Informasi", major: "Sistem Informasi", period: "2023" },
-]);
-
 // Filters
 const filters = ref({
-    global: { value: null, matchMode: "contains" },
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    jurusan: { value: null, matchMode: FilterMatchMode.IN },
+    tipe: { value: null, matchMode: FilterMatchMode.IN },
+    periode: { value: null, matchMode: FilterMatchMode.IN },
 });
-
 // Selected Row and Fields
 const selectedRow = ref(null);
 const selectedMajor = ref(null); // Selected major
 const periode = ref(null); // Selected period
 const loading = ref(true); // Loading state (initially true)
 const availableSheets = ref([]); // Stores available sheets fetched from the API
+
+// Variabel for filter options
+const jurusanOptions = computed(() =>
+    Array.from(new Set(availableSheets.value.map((sheet) => sheet.jurusan)))
+);
+const tipeOptions = computed(() =>
+    Array.from(new Set(availableSheets.value.map((sheet) => sheet.tipe)))
+);
+const periodeOptions = computed(() =>
+    Array.from(new Set(availableSheets.value.map((sheet) => sheet.periode)))
+);
 
 // Role (for conditional rendering)
 const role = ref("User"); // Change this to "SuperUser" to test the SuperUser button
@@ -46,27 +47,34 @@ onMounted(async () => {
 
 // Filtered Data
 const filteredData = computed(() => {
-    let data = sheetData.value;
+    let data = availableSheets.value;
 
     // Apply global search filter
     if (filters.value.global.value) {
         const searchText = filters.value.global.value.toLowerCase();
         data = data.filter((row) => {
             return (
-                row.faculty.toLowerCase().includes(searchText) ||
-                row.major.toLowerCase().includes(searchText) ||
-                row.period.toLowerCase().includes(searchText)
+                row.jurusan.toLowerCase().includes(searchText) ||
+                row.tipe.toLowerCase().includes(searchText) ||
+                row.periode.toLowerCase().includes(searchText)
             );
         });
     }
 
-    // Filter rows to only show those with available sheets
-    if (availableSheets.value.length > 0) {
+    // Apply column-specific filters
+    if (filters.value.jurusan.value && filters.value.jurusan.value.length > 0) {
         data = data.filter((row) =>
-            availableSheets.value.some(
-                (sheet) =>
-                    sheet.jurusan === row.major && sheet.periode.includes(row.period)
-            )
+            filters.value.jurusan.value.includes(row.jurusan)
+        );
+    }
+    if (filters.value.tipe.value && filters.value.tipe.value.length > 0) {
+        data = data.filter((row) =>
+            filters.value.tipe.value.includes(row.tipe)
+        );
+    }
+    if (filters.value.periode.value && filters.value.periode.value.length > 0) {
+        data = data.filter((row) =>
+            filters.value.periode.value.includes(row.periode)
         );
     }
 
@@ -76,20 +84,28 @@ const filteredData = computed(() => {
 // Clear Filter
 const clearFilter = () => {
     filters.value.global.value = null;
+    filters.value.jurusan.value = null;
+    filters.value.tipe.value = null;
+    filters.value.periode.value = null;
 };
 
 // Row Select Event
 const onRowSelect = (event) => {
     selectedRow.value = event.data; // Set the selected row
-    selectedMajor.value = event.data.major; // Set the selected major
+    selectedMajor.value = event.data.jurusan; // Set the selected major
+    periode.value = event.data.periode;
+    console.log(selectedMajor.value);
+    console.log(periode.value)
 
-    // Find the matching sheet to get the correct periode
-    const matchingSheet = availableSheets.value.find(
-        (sheet) =>
-            sheet.jurusan === event.data.major && sheet.periode.includes(event.data.period)
-    );
-    periode.value = matchingSheet ? matchingSheet.periode : null; // Set the selected period
-    console.log("Selected Row:", event.data);
+    // Directly navigate to the sheet route
+    router.push({
+        name: "Sheet",
+        params: {
+            jurusan: encodeURIComponent(selectedMajor.value),
+            periode: encodeURIComponent(periode.value),
+        },
+    });
+    console.log("Navigating to Sheet:", event.data);
 };
 
 // Navigate to Sheet
@@ -124,46 +140,136 @@ const navigateToSuperUser = () => {
 </script>
 
 <template>
-    <main class="w-full min-h-screen flex flex-col items-center justify-center bg-white rounded-lg shadow-lg">
+    <main
+        class="w-full min-h-screen flex flex-col items-center justify-center bg-white rounded-lg shadow-lg"
+    >
         <!-- Your content here -->
         <div class="flex flex-col gap-4 w-full max-w-4xl">
             <div class="card">
                 <!-- Loading State -->
-                <div v-if="loading" class="mt-4">
-                    <p>Loading sheet data...</p>
-                </div>
 
                 <!-- Table (only rendered after data is fetched) -->
-                <div v-else>
-                    <DataTable :value="filteredData" v-model:selection="selectedRow" selectionMode="single"
-                        removableSort filterDisplay="menu" tableStyle="min-width: 50rem" @row-select="onRowSelect">
+                <div class="top-0 bg-white">
+                    <DataTable
+                        :value="filteredData"
+                        v-model:selection="selectedRow"
+                        v-model:filters="filters"
+                        paginator
+                        :rows="10"
+                        datakey="id"
+                        selectionMode="single"
+                        filterDisplay="row"
+                        :globalFilterFields="['jurusan', 'periode', 'tipe']"
+                        tableStyle="min-width: 50rem"
+                        @row-select="onRowSelect"
+                    >
                         <template #header>
                             <div class="flex justify-between">
-                                <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined
-                                    @click="clearFilter" />
+                                <div>
+                                    <Button
+                                        style="width: auto"
+                                        type="button"
+                                        icon="pi pi-filter-slash"
+                                        label="Clear"
+                                        outlined
+                                        @click="clearFilter"
+                                    />
+                                </div>
                                 <IconField>
                                     <InputIcon>
                                         <i class="pi pi-search" />
                                     </InputIcon>
-                                    <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+                                    <InputText
+                                        v-model="filters['global'].value"
+                                        placeholder="Keyword Search"
+                                    />
                                 </IconField>
                             </div>
                         </template>
-                        <Column field="faculty" header="Faculty" sortable style="width: 25%"></Column>
-                        <Column field="major" header="Major" sortable style="width: 25%"></Column>
-                        <Column field="period" header="Period" sortable style="width: 25%"></Column>
-                    </DataTable>
+                        <template #empty> No customers found. </template>
+                        <!-- Column Jurusan -->
+                        <Column
+                            field="jurusan"
+                            header="Jurusan"
+                            :showFilterMenu="false"
+                            style="width: 25%"
+                        >
+                            <template #body="{ data }">
+                                {{ data.jurusan }}
+                            </template>
+                            <template #filter="{ filterModel, filterCallback }">
+                                <MultiSelect
+                                    v-model="filterModel.value"
+                                    @change="filterCallback()"
+                                    :options="jurusanOptions"
+                                    placeholder="Select Jurusan"
+                                    style="min-width: 14rem"
+                                />
+                            </template>
+                        </Column>
 
-                    <!-- Display selected row data -->
-                    <div v-if="selectedRow" class="mt-4">
-                        <h3>Selected Row:</h3>
-                        <p><strong>Faculty:</strong> {{ selectedRow.faculty }}</p>
-                        <p><strong>Major:</strong> {{ selectedRow.major }}</p>
-                        <p><strong>Period:</strong> {{ periode }}</p>
-                        <Button v-if="role === 'SuperUser'" label="Go" class="p-button-success w-full"
-                            @click="navigateToSuperUser" />
-                        <Button v-else label="Go" class="p-button-success w-full" @click="navigateToSheet" />
-                    </div>
+                        <!-- Column Tipe -->
+                        <Column
+                            field="tipe"
+                            header="Tipe"
+                            :showFilterMenu="false"
+                            style="width: 25%"
+                        >
+                            <template #body="{ data }">
+                                {{ data.tipe }}
+                            </template>
+                            <template #filter="{ filterModel, filterCallback }">
+                                <MultiSelect
+                                    v-model="filterModel.value"
+                                    @change="filterCallback()"
+                                    :options="tipeOptions"
+                                    placeholder="Select Tipe"
+                                    style="min-width: 14rem"
+                                />
+                            </template>
+                        </Column>
+
+                        <!-- Column Periode -->
+                        <Column
+                            field="periode"
+                            header="Period"
+                            :showFilterMenu="false"
+                            style="width: 25%"
+                        >
+                            <template #body="{ data }">
+                                {{ data.periode }}
+                            </template>
+                            <template #filter="{ filterModel, filterCallback }">
+                                <MultiSelect
+                                    v-model="filterModel.value"
+                                    @change="filterCallback()"
+                                    :options="periodeOptions"
+                                    placeholder="Select Period"
+                                    style="min-width: 14rem"
+                                />
+                            </template>
+                        </Column>
+                    </DataTable>
+                </div>
+
+                <!-- Display selected row data -->
+                <div v-if="selectedRow" class="mt-4">
+                    <h3>Selected Row:</h3>
+                    <p><strong>Faculty:</strong> {{ selectedRow.faculty }}</p>
+                    <p><strong>Major:</strong> {{ selectedRow.major }}</p>
+                    <p><strong>Period:</strong> {{ periode }}</p>
+                    <Button
+                        v-if="role === 'SuperUser'"
+                        label="Go"
+                        class="p-button-success w-full"
+                        @click="navigateToSuperUser"
+                    />
+                    <Button
+                        v-else
+                        label="Go"
+                        class="p-button-success w-full"
+                        @click="navigateToSheet"
+                    />
                 </div>
             </div>
         </div>
