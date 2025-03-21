@@ -1,12 +1,34 @@
 <template>
-    <div class="h-screen w-screen flex">
+    <div class="h-screen w-screen flex relative">
+        <div
+            :class="[
+                { hidden: !loading },
+                'absolute',
+                'z-50',
+                'inset-0',
+                'w-full',
+                'h-full',
+                'bg-black/50',
+                'flex',
+                'items-center',
+                'justify-center',
+            ]"
+        >
+            <ProgressSpinner
+                style="width: 80px; height: 80px"
+                strokeWidth="6"
+                fill="transparent"
+                v-if="loading"
+                aria-label="Loading"
+            />
+        </div>
         <Toast />
 
         <!-- Bagian Kiri: Gambar -->
-        <div class="flex flex-col items-center justify-center w-1/2 bg-blue-400">
-            <div
-                class="items-center justify-center"
-            >
+        <div
+            class="flex flex-col items-center justify-center w-1/2 bg-blue-400"
+        >
+            <div class="items-center justify-center">
                 <Image
                     src="/image/logo-white-itats-full.webp"
                     alt="Login Image"
@@ -109,6 +131,7 @@ import { useToast } from "primevue/usetoast";
 import Toast from "primevue/toast";
 import Button from "primevue/button";
 import Message from "primevue/message";
+import ProgressSpinner from "primevue/progressspinner";
 
 const router = useRouter();
 const loading = ref(false);
@@ -137,8 +160,8 @@ onMounted(() => {
 
 const login = async (e) => {
     if (e.valid) {
+        loading.value = true;
         try {
-            loading.value = true;
             const response = await axios.post("/api/login", {
                 email: e.values.email,
                 password: e.values.password,

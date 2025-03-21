@@ -35,6 +35,8 @@ const role = ref("User"); // Change this to "SuperUser" to test the SuperUser bu
 // Fetch data on component mount
 onMounted(async () => {
     try {
+        loading.value = true;
+        // await new Promise(resolve => setTimeout(resolve, 10000)); // Simulate a delay of 10 seconds
         const response = await fetch("/api/getAllSheet");
         const data = await response.json();
         availableSheets.value = data; // Update available sheets with fetched data
@@ -95,7 +97,7 @@ const onRowSelect = (event) => {
     selectedMajor.value = event.data.jurusan; // Set the selected major
     periode.value = event.data.periode;
     console.log(selectedMajor.value);
-    console.log(periode.value)
+    console.log(periode.value);
 
     // Directly navigate to the sheet route
     router.push({
@@ -141,21 +143,20 @@ const navigateToSuperUser = () => {
 
 <template>
     <main
-        class="w-full min-h-screen flex flex-col items-center justify-center bg-white rounded-lg shadow-lg"
+        class="min-w-full w-full flex flex-col items-center justify-center bg-white rounded-lg shadow-lg"
     >
         <!-- Your content here -->
         <div class="flex flex-col gap-4 w-full max-w-4xl">
             <div class="card">
-                <!-- Loading State -->
-
                 <!-- Table (only rendered after data is fetched) -->
                 <div class="top-0 bg-white">
                     <DataTable
-                        :value="filteredData"
+                        :value="loading ? Array(10).fill(null) : filteredData"
                         v-model:selection="selectedRow"
                         v-model:filters="filters"
                         paginator
                         :rows="10"
+                        stripedRows
                         datakey="id"
                         selectionMode="single"
                         filterDisplay="row"
@@ -195,7 +196,10 @@ const navigateToSuperUser = () => {
                             style="width: 25%"
                         >
                             <template #body="{ data }">
-                                {{ data.jurusan }}
+                                <span v-if="loading">
+                                    <Skeleton width="150px" height="16px" />
+                                </span>
+                                <span v-else>{{ data.jurusan }}</span>
                             </template>
                             <template #filter="{ filterModel, filterCallback }">
                                 <MultiSelect
@@ -216,7 +220,11 @@ const navigateToSuperUser = () => {
                             style="width: 25%"
                         >
                             <template #body="{ data }">
-                                {{ data.tipe }}
+                                <span v-if="loading">
+                                    <Skeleton width="150px" height="16px" />
+                                </span>
+                                <span v-else>{{ data.tipe }}</span>
+                                <!-- {{ data.tipe }} -->
                             </template>
                             <template #filter="{ filterModel, filterCallback }">
                                 <MultiSelect
@@ -237,7 +245,11 @@ const navigateToSuperUser = () => {
                             style="width: 25%"
                         >
                             <template #body="{ data }">
-                                {{ data.periode }}
+                                <span v-if="loading">
+                                    <Skeleton width="150px" height="16px" />
+                                </span>
+                                <span v-else>{{ data.periode }}</span>
+                                <!-- {{ data.periode }} -->
                             </template>
                             <template #filter="{ filterModel, filterCallback }">
                                 <MultiSelect

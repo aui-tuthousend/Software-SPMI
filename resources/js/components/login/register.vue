@@ -9,6 +9,7 @@ import { Form } from "@primevue/forms";
 import Button from "primevue/button";
 import Message from "primevue/message";
 import Select from "primevue/select";
+// import ProgressSpinner from "primevue/progressspinner";
 
 const router = useRouter();
 const toast = useToast();
@@ -81,13 +82,29 @@ const register = async (e) => {
 
 <template>
     <div class="h-screen w-screen flex">
+        <div
+            :class="[
+                { hidden: !loading },
+                'absolute',
+                'z-50',
+                'inset-0',
+                'w-full',
+                'h-full',
+                'bg-black/50',
+                'flex',
+                'items-center',
+                'justify-center',
+            ]"
+        >
+            <ProgressSpinner v-if="loading" aria-label="Loading" />
+        </div>
         <Toast />
 
         <!-- Bagian Kiri: Gambar -->
-        <div class="flex flex-col items-center justify-center w-1/2 bg-blue-400">
-            <div
-                class="items-center justify-center"
-            >
+        <div
+            class="flex flex-col items-center justify-center w-1/2 bg-blue-400"
+        >
+            <div class="items-center justify-center">
                 <Image
                     src="/image/logo-white-itats-full.webp"
                     alt="Login Image"

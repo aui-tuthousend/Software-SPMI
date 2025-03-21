@@ -24,9 +24,11 @@ import {
     Menubar,
     MultiSelect,
     Password,
+    ProgressSpinner,
     Ripple,
     Row,
     Select,
+    Skeleton,
     Textarea,
 } from "primevue";
 
@@ -62,5 +64,7 @@ appVue.component("Row", Row);
 appVue.component("Column", Column);
 appVue.component("ColumnGroup", ColumnGroup);
 appVue.component("MultiSelect", MultiSelect);
+appVue.component("ProgressSpinner", ProgressSpinner);
+appVue.component("Skeleton", Skeleton);
 appVue.directive("ripple", Ripple);
 appVue.mount("#app");
