@@ -14,7 +14,10 @@
                     <Avatar
                         image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
                         shape="circle"
+                        @click="toggleMenu"
+                        style="cursor: pointer;"
                     />
+                    <TieredMenu ref="menu" id="overlay_tmenu" :model="profileMenu" popup />
                 </div>
             </template>
         </Menubar>
@@ -27,9 +30,26 @@ import { useRouter } from "vue-router";
 import { Avatar, Menubar } from "primevue";
 
 const router = useRouter();
-const token = localStorage.getItem("token");
 const user = localStorage.getItem("name");
 const loading = ref(false);
+const menu = ref(null);
+
+const toggleMenu = (e) => {
+    menu.value.toggle(e);
+};
+
+const profileMenu = computed(() => [
+    {
+        label: user,
+        icon: "pi pi-user",
+        disabled: true,
+    },
+    {
+        label: "Logout",
+        icon: "pi pi-sign-out",
+        command: logout,
+    },
+]);
 
 const logout = async () => {
     try {
@@ -61,11 +81,6 @@ const items = computed(() => {
             label: "Home",
             icon: "pi pi-home",
             command: () => router.push("/"),
-        },
-        {
-            label: "Logout",
-            icon: "pi pi-sign-out",
-            command: logout,
         },
     ];
 

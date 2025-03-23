@@ -30,6 +30,7 @@ import {
     Select,
     Skeleton,
     Textarea,
+    TieredMenu,
 } from "primevue";
 
 const appVue = createApp(app);
@@ -65,6 +66,7 @@ appVue.component("Column", Column);
 appVue.component("ColumnGroup", ColumnGroup);
 appVue.component("MultiSelect", MultiSelect);
 appVue.component("ProgressSpinner", ProgressSpinner);
+appVue.component("TieredMenu", TieredMenu);
 appVue.component("Skeleton", Skeleton);
 appVue.directive("ripple", Ripple);
 appVue.mount("#app");
