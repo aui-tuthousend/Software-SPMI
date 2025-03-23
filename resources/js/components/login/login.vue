@@ -162,13 +162,16 @@ const login = async (e) => {
     if (e.valid) {
         loading.value = true;
         try {
+            await axios.get('/sanctum/csrf-cookie');
+
             const response = await axios.post("/api/login", {
                 email: e.values.email,
                 password: e.values.password,
             });
+
             loading.value = false;
+
             localStorage.setItem("name", response.data.name);
-            localStorage.setItem("token", response.data.token);
             localStorage.setItem("userRole", response.data.userRole);
             localStorage.setItem(
                 "toastMessage",
@@ -176,9 +179,6 @@ const login = async (e) => {
             );
             localStorage.setItem("toastSeverity", "success");
 
-            axios.defaults.headers.common[
-                "Authorization"
-            ] = `Bearer ${response.data.token}`;
             await router.push("/");
         } catch (error) {
             toast.add({

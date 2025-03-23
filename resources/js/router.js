@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import axios from "axios";
 import Home from './components/homepage/home.vue';
 import Sheet from './components/sheets/sheet.vue';
 import SuperUser from './components/sheets/superUser.vue';
@@ -8,18 +9,27 @@ import Login from './components/login/login.vue';
 import NotFound from './components/notFound.vue';
 import HomeAdmin from "./components/admin/homeAdmin.vue";
 
+const isAuthenticated = async () => {
+    try {
+        axios.defaults.withCredentials = true;
+        await axios.get("/api/user", { withCredentials: true });
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
             path: '/',
             component: Home,
-            beforeEnter: (to, from, next) => {
-                const token = localStorage.getItem("token");
-                if (token === null) {
-                    next('/login');
-                } else {
+            beforeEnter: async (to, from, next) => {
+                if (await isAuthenticated()) {
                     next();
+                } else {
+                    next('/login');
                 }
             },
         },
@@ -27,12 +37,11 @@ const router = createRouter({
             path: '/sheet/:jurusan/:periode',
             name: 'Sheet',
             component: Sheet,
-            beforeEnter: (to, from, next) => {
-                const token = localStorage.getItem("token");
-                if (token === null) {
-                    next('/login');
-                } else {
+            beforeEnter: async (to, from, next) => {
+                if (await isAuthenticated()) {
                     next();
+                } else {
+                    next('/login');
                 }
             },
         },
@@ -40,27 +49,27 @@ const router = createRouter({
             path: '/superUser/:jurusan/:periode',
             name: 'SuperUser',
             component: SuperUser,
-            beforeEnter: (to, from, next) => {
-                const token = localStorage.getItem("token");
-                if (token === null) {
-                    next('/login');
-                } else {
+            beforeEnter: async (to, from, next) => {
+                if (await isAuthenticated()) {
                     next();
+                } else {
+                    next('/login');
                 }
             },
         },
         {
             path: '/import',
             component: Importexcel,
-            beforeEnter: (to, from, next) => {
-                const token = localStorage.getItem("token");
-                const role = localStorage.getItem("userRole");
-                if (token === null) {
-                    next('/login');
-                } else if (role !== "Evaluasi") {
-                    next('/')
+            beforeEnter: async (to, from, next) => {
+                if (await isAuthenticated()) {
+                    const role = localStorage.getItem("userRole");
+                    if (role === "Evaluasi") {
+                        next();
+                    } else {
+                        next('/');
+                    }
                 } else {
-                    next();
+                    next('/login');
                 }
             },
         },
@@ -81,20 +90,22 @@ const router = createRouter({
         {
             path: '/:pathMatch(.*)*',
             component: NotFound,
+            meta: {
+                showMenubar: false
+            },
         },
         {
             path: '/admin/dashboard',
             component: HomeAdmin,
-            beforeEnter: (to, from, next) => {
-                const token = localStorage.getItem("token");
-                if (token === null) {
-                    next('/login');
-                } else {
+            beforeEnter: async (to, from, next) => {
+                if (await isAuthenticated()) {
                     next();
+                } else {
+                    next('/login');
                 }
             },
         },
     ],
-})
+});
 
-export default router
+export default router;

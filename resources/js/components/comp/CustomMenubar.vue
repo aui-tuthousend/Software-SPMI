@@ -38,9 +38,7 @@ const logout = async () => {
             "/api/logout",
             {},
             {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                withCredentials: true,
             }
         );
         loading.value = false;
