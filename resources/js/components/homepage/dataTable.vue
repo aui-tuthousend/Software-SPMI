@@ -187,7 +187,7 @@ const navigateToSuperUser = () => {
                                 </IconField>
                             </div>
                         </template>
-                        <template #empty> No customers found. </template>
+                        <template #empty><div class="flex items-center justify-center h-full"> No sheets found. </div></template>
                         <!-- Column Jurusan -->
                         <Column
                             field="jurusan"

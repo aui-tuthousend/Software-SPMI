@@ -15,7 +15,8 @@ onMounted(() => {
     if (toastMessage) {
         toast.add({
             severity: toastSeverity || "success",
-            summary: toastMessage,
+            summary: "Success",
+            detail: toastMessage,
             life: 3000,
         });
 
@@ -28,7 +29,7 @@ onMounted(() => {
 <template>
     <div class="max-h-full h-full overflow-auto">
         <Toast />
-        <div class="px-5">
+        <div class="px-6 py-3">
             <Homepage v-if="page === 'home'" />
             <Import v-if="page === 'import'" />
         </div>
