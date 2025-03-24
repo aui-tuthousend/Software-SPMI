@@ -16,11 +16,13 @@ import {
     Column,
     ColumnGroup,
     DataTable,
+    Dialog,
     FloatLabel,
     IconField,
     Image,
     InputIcon,
     InputText,
+    Menu,
     Menubar,
     MultiSelect,
     Password,
@@ -31,6 +33,7 @@ import {
     Skeleton,
     Textarea,
     TieredMenu,
+    Toolbar,
 } from "primevue";
 
 const appVue = createApp(app);
@@ -67,6 +70,9 @@ appVue.component("ColumnGroup", ColumnGroup);
 appVue.component("MultiSelect", MultiSelect);
 appVue.component("ProgressSpinner", ProgressSpinner);
 appVue.component("TieredMenu", TieredMenu);
+appVue.component("Toolbar", Toolbar);
 appVue.component("Skeleton", Skeleton);
+appVue.component("Menu", Menu);
+appVue.component("Dialog", Dialog);
 appVue.directive("ripple", Ripple);
 appVue.mount("#app");
