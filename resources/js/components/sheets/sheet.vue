@@ -5,8 +5,9 @@ import Pelaksanaan from "@/components/sheets/pelaksanaan.vue";
 import Pengendalian from "@/components/sheets/pengendalian.vue";
 import data from "bootstrap/js/src/dom/data.js";
 import Evaluasi from "@/components/sheets/evaluasi.vue";
+import {useToast} from "primevue";
 
-
+const toast = useToast();
 const standarData = ref([]);
 const loading = ref(false);
 
@@ -47,6 +48,7 @@ const submitData = (formData) => {
         }
     })
         .then(response => {
+            toast.add({ severity: 'success', summary: 'Success Saving', detail: 'Evaluasi Saved', life: 3000 });
             console.log('Data submitted successfully:', response.data);
             re.value++;
             update.value = false;
@@ -86,7 +88,7 @@ onBeforeMount(() => {
 <template>
     <div class="c1">
         <router-link class="pop" to="/">Home</router-link>
-
+        <Toast />
         <p>tipe:</p>
         <select v-model="currentSheet" class="tipe" required>
             <option v-for="t in tipeSheet" :key="t">{{ t }}</option>
