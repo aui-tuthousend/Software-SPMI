@@ -1,4 +1,5 @@
 <template>
+    <Toast />
     <main class="admin-page">
         <div class="card">
             <Toolbar class="mb-4">
@@ -227,7 +228,9 @@
 import { onMounted } from "vue";
 import { useUserManagement } from "@/composables/useUserManagement";
 import { useUserActions } from "@/composables/useUserActions";
+import { Toast, useToast } from "primevue";
 
+const toast = useToast();
 const {
     users,
     showModal,
@@ -250,6 +253,21 @@ const { menuItems, toggleMenu } = useUserActions(
 );
 
 onMounted(() => {
+    const toastMessage = localStorage.getItem("toastMessage");
+    const toastSeverity = localStorage.getItem("toastSeverity");
+
+    if (toastMessage) {
+        toast.add({
+            severity: toastSeverity || "success",
+            summary: "Success",
+            detail: toastMessage,
+            life: 3000,
+        });
+
+        localStorage.removeItem("toastMessage");
+        localStorage.removeItem("toastSeverity");
+    }
+
     fetchUsers();
 });
 </script>

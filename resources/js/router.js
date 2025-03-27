@@ -27,7 +27,12 @@ const router = createRouter({
             component: Home,
             beforeEnter: async (to, from, next) => {
                 if (await isAuthenticated()) {
-                    next();
+                    const role = localStorage.getItem("userRole");
+                    if (role === "Admin") {
+                        next('/admin/dashboard');
+                    } else {
+                        next();
+                    }
                 } else {
                     next('/login');
                 }
@@ -99,7 +104,13 @@ const router = createRouter({
             component: HomeAdmin,
             beforeEnter: async (to, from, next) => {
                 if (await isAuthenticated()) {
-                    next();
+                    const role = localStorage.getItem("userRole");
+                    console.log(role);
+                    if (role === "Admin") {
+                        next();
+                    } else {
+                        next('/');
+                    }
                 } else {
                     next('/login');
                 }

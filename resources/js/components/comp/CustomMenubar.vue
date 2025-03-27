@@ -92,6 +92,14 @@ const items = computed(() => {
         });
     }
 
+    if (localStorage.getItem("userRole") === "Admin") {
+        baseItems.splice(0, 1, {
+            label: "User Management",
+            icon: "pi pi-user-edit",
+            command: () => router.push("/admin/dashboard"),
+        });
+    }
+
     return baseItems;
 });
 </script>

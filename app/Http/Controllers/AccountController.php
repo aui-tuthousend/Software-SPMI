@@ -116,7 +116,7 @@ class AccountController extends Controller
     {
         $request->validate([
             'user_id' => 'required|integer',
-            'new_role' => 'required|string|in:Pelaksanaan,Evaluasi,SuperUser,Pengendalian,Peningkatan', // adjust roles as needed
+            'new_role' => 'required|string|in:Pelaksanaan,Evaluasi,SuperUser,Pengendalian,Peningkatan,Admin', // adjust roles as needed
         ]);
 
         $user = User::find($request->user_id);

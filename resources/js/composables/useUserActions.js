@@ -20,7 +20,7 @@ export function useUserActions(setShowEditModal, setSelectedUser) {
   ]);
 
   const viewHistory = (user) => {
-    alert(`Viewing history for: ${user.name}`);
+    alert(`This feature not ready yet`);
   };
 
   const editRole = (user) => {

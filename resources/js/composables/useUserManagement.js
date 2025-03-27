@@ -1,10 +1,12 @@
 import { ref, reactive } from 'vue';
+import { useToast } from 'primevue';
 
 export function useUserManagement() {
   const users = ref([]);
   const showModal = ref(false);
   const submitted = ref(false);
   const menu = ref();
+  const toast = useToast();
 
   const newUser = reactive({
     email: '',
@@ -17,7 +19,8 @@ export function useUserManagement() {
     { name: 'Evaluasi', value: 'Evaluasi' },
     { name: 'Pelaksanaan', value: 'Pelaksanaan' },
     { name: 'Peningkatan', value: 'Peningkatan' },
-    { name: 'Pengendalian', value: 'Pengendalian' }
+    { name: 'Pengendalian', value: 'Pengendalian' },
+    { name: 'Admin', value: 'Admin' }
   ];
 
   const showEditModal = ref(false);
@@ -45,7 +48,12 @@ export function useUserManagement() {
           password: newUser.password,
           role: newUser.role,
         });
-        console.log('User registered:', response.data);
+        toast.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'User registered successfully',
+          life: 3000,
+        });
         showModal.value = false;
         await fetchUsers();
         resetForm();
@@ -78,13 +86,23 @@ export function useUserManagement() {
         const response = await axios.post('/api/admin/edit/role', {
           user_id: selectedUser.value.id,
           new_role: selectedUser.value.role
+          });
+        toast.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Role updated successfully',
+          life: 3000,
         });
-        console.log('Role updated:', response.data);
         showEditModal.value = false;
         await fetchUsers();
         editSubmitted.value = false;
       } catch (error) {
-        console.error('Error updating role:', error.response?.data);
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update role',
+          life: 3000,
+        });
       }
     }
   };
