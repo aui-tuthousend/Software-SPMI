@@ -1,8 +1,10 @@
 <script setup>
 import { defineAsyncComponent, ref } from "vue";
-import CustomButton from "@/components/comp/custom-button.vue";
-import {debounce} from "lodash";
+import {useConfirm, useToast} from "primevue";
+import ConfirmPopup from 'primevue/confirmpopup';
 
+const confirm = useConfirm();
+const toast = useToast();
 const Modal = defineAsyncComponent({
     loader: () => import('../sheets/modal.vue'),
 });
@@ -15,46 +17,43 @@ const props = defineProps({
 
 const emit = defineEmits(['submit-data', 'update']);
 
-const dataEval = ref([]);
+const isEditing = ref(false);
 const username = localStorage.getItem('name');
 
 const adjusmentOptions = ref(['melampaui', 'mencapai', 'belum mencapai', 'menyimpang']);
 const selectedAdjusment = ref('');
 
-const saveEval =(data) => {
+const saveEval =(data, event) => {
+    if (!data.adjusment){
+        toast.add({ severity: 'error', summary: 'Error Saving', detail: 'Please Fill the Adjusment', life: 3000 });
+        return;
+    } else if (!data.evaluasi){
+        toast.add({ severity: 'error', summary: 'Error Saving', detail: 'Please Fill the Evaluasi', life: 3000 });
+        return;
+    }
 
-    const newData = {
-        idBuktiPelaksanaan: data.idBuktiPelaksanaan,
-        komentarEvaluasi: data.komenEval,
-        adjusment: data.adjusment,
-        idEvaluasi: data.idE,
-        userName: data.username,
-        idInd: data.idInd,
-        indicator: data.indicator,
-    };
-    // const index = dataEval.value.findIndex(item => item.idBuktiPelaksanaan === idBuktiPelaksanaan);
-    // if (index !== -1) {
-    //     if (komenEval !== '' || adjusment !== ''){
-    //         dataEval.value.splice(index, 1, newData);
-    //         return;
-    //     }
-    //     if (komenEval !== '' || adjusment !== '' || idBE !== ''){
-    //         dataEval.value.splice(index, 1, newData);
-    //         return;
-    //     }
-    //     dataEval.value.splice(index, 1);
-    // } else {
-    //     dataEval.value.push(newData);
-    // }
-    //
-    // if (dataEval.value.length > 0){
-    //     emit('update', true);
-    // } else {
-    //     emit('update', false);
-    // }
-
-    // console.log(dataEval.value);
-    emit('submit-data', newData)
+    confirm.require({
+        target: event.currentTarget,
+        group: 'headless',
+        message: 'Save your current process?',
+        accept: () => {
+            const newData = {
+                idBuktiPelaksanaan: data.idBukti,
+                komentarEvaluasi: data.evaluasi,
+                adjusment: data.adjusment,
+                idEvaluasi: data.idPelaksanaan,
+                userName: username,
+                idInd: data.id,
+                indicator: data.indicator,
+            };
+            emit('submit-data', newData)
+            isEditing.value = false
+            // toast.add({severity:'info', summary:'Confirmed', detail:'You have accepted', life: 3000});
+        },
+        reject: () => {
+            toast.add({severity:'error', summary:'Rejected', detail:'You have rejected', life: 3000});
+        }
+    });
 };
 
 function submit(){
@@ -76,7 +75,18 @@ const openPopup = (indicator, tipe) => {
 </script>
 
 <template class="table gap-5">
-
+    <Toast />
+    <ConfirmPopup group="headless">
+        <template #container="{ message, acceptCallback, rejectCallback }">
+            <div class="rounded p-4">
+                <span>{{ message.message }}</span>
+                <div class="flex items-center gap-2 mt-4">
+                    <Button label="Save" @click="acceptCallback" size="small"></Button>
+                    <Button label="Cancel" outlined @click="rejectCallback" severity="secondary" size="small" text></Button>
+                </div>
+            </div>
+        </template>
+    </ConfirmPopup>
     <DataTable
         :value="props.data"
         showGridlines
@@ -107,11 +117,11 @@ const openPopup = (indicator, tipe) => {
                 <div
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
-                    class="h-[7rem] flex items-center justify-center"
+                    class="h-[10rem] w-[20rem] flex items-center justify-center"
                 >
                     <Textarea
                         v-model="indicator.indicator"
-                        style="resize: none; height: 6rem"
+                        style="resize: none; height: 9rem"
                     />
                 </div>
             </template>
@@ -121,7 +131,7 @@ const openPopup = (indicator, tipe) => {
                 <div
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
-                    class="h-[7rem] flex items-center justify-center"
+                    class="h-[10rem] flex items-center justify-center"
                 >
                     {{indicator.target}}
                 </div>
@@ -132,13 +142,17 @@ const openPopup = (indicator, tipe) => {
                 <div
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
-                    class="h-[7rem] max-w-[25rem] flex items-center justify-start"
+                    class="h-[10rem] w-[20rem] flex items-center justify-start"
                 >
-                    <Textarea
-                        disabled fluid
-                        v-model="indicator.bukti"
-                        style="resize: none; width: 30rem; height: 6rem"
-                    />
+                    <Card class="custom-card" >
+                        <template #content>
+                            <ScrollPanel style="width: 100%; height: 9rem">
+                                <p>
+                                    {{indicator.bukti}}
+                                </p>
+                            </ScrollPanel>
+                        </template>
+                    </Card>
                 </div>
             </template>
         </Column>
@@ -147,7 +161,7 @@ const openPopup = (indicator, tipe) => {
                 <div
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
-                    class="h-[7rem] flex items-center justify-center"
+                    class="h-[10rem] flex items-center justify-center"
                 >
                     <Button
                         @click="openPopup(indicator.idBukti, 'Pelaksanaan')"
@@ -165,14 +179,15 @@ const openPopup = (indicator, tipe) => {
                 <div
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
-                    class="h-[7rem] flex items-center justify-center"
+                    class="h-[10rem] w-[20rem] flex items-center justify-center"
                 >
 
                     <FloatLabel variant="on" >
                         <Textarea
+                            :disabled="isEditing && !indicator.isUpdate"
                             v-model="indicator.evaluasi"
-                            @input="indicator.isUpdate = true"
-                            style="resize: none; height: 6rem; width: 20rem"
+                            @input="indicator.isUpdate = true; isEditing = true"
+                            style="resize: none; height: 9rem; width: 20rem"
                         />
                         <label
                             for="on_label"
@@ -188,11 +203,12 @@ const openPopup = (indicator, tipe) => {
                 <div
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
-                    class="h-[7rem] flex items-center justify-center"
+                    class="h-[10rem] flex items-center justify-center"
                 >
                     <Select
                         style="width: 10rem"
-                        @change="indicator.isUpdate = true"
+                        :disabled="isEditing && !indicator.isUpdate"
+                        @change="indicator.isUpdate = true; isEditing = true"
                         v-model="indicator.adjusment"
                         :options="adjusmentOptions"
                         checkmark :highlightOnSelect="false"
@@ -205,7 +221,7 @@ const openPopup = (indicator, tipe) => {
                 <div
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
-                    class="h-[7rem] flex items-center justify-center"
+                    class="h-[10rem] flex items-center justify-center"
                 >
                     <Button
                         v-if="indicator.idBuktiEval !== ''"
@@ -226,12 +242,12 @@ const openPopup = (indicator, tipe) => {
                 <div
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
-                    class="h-[7rem] flex items-center justify-center"
+                    class="h-[10rem] flex items-center justify-center"
                 >
-<!--                    <Button>Link</Button>-->
+
                     <Button
                         v-if="indicator.isUpdate"
-                        @click="saveEval(indicator)"
+                        @click="saveEval(indicator, $event)"
                         icon="pi pi-check" iconPos="right"
                         style="width: 4rem; height: 2rem;"
                         severity="info"
@@ -248,92 +264,6 @@ const openPopup = (indicator, tipe) => {
 
 
     </DataTable>
-    <br />
-<!--    <div class="table">-->
-<!--        <table :class="props.role">-->
-<!--            <thead>-->
-<!--            <tr>-->
-<!--                <th colspan="3"><h4 class="font-poppin">Penetapan</h4></th>-->
-<!--                <th colspan="2"><h4 class="font-poppin">Pelaksanaan</h4></th>-->
-<!--                <th colspan="5"><h4 class="font-poppin">Evaluasi</h4></th>-->
-<!--                <th rowspan="2" class="link">save</th>-->
-<!--            </tr>-->
-<!--            <tr>-->
-<!--                <th><div class="th">Standar</div></th>-->
-<!--                <th><div class="th">Indikator</div></th>-->
-<!--                <th>Target</th>-->
-<!--                <th><div class="xd">Komentar</div></th>-->
-<!--                <th><div class="font-poppin link">Link Bukti</div></th>-->
-<!--                <th colspan="2"><div class="font-poppin th">Komentar Evaluasi</div></th>-->
-<!--                <th colspan="2"><div class="font-poppin">Adjusment</div></th>-->
-<!--                <th><div class="font-poppin link">Link Bukti Evaluasi</div></th>-->
-<!--            </tr>-->
-<!--            </thead>-->
-<!--            <tbody>-->
-<!--            <template v-for="(standar, index) in props.data" :key="index">-->
-<!--                <tr>-->
-<!--                    <td :rowspan="standar.indicators.length + 1">{{ standar.standar }}</td>-->
-<!--                </tr>-->
-<!--                <tr v-for="data in standar.indicators" :key="data.id">-->
-<!--&lt;!&ndash;                    <td>{{ data.indicator }}</td>&ndash;&gt;-->
-<!--                    <td>-->
-<!--                        <textarea v-model="data.indicator" class="ta" ></textarea>-->
-<!--                    </td>-->
-<!--                    <td>{{ data.target }}</td>-->
-
-<!--                    <td>-->
-<!--                        <p>{{ data.bukti }}</p>-->
-<!--                    </td>-->
-<!--                    <td>-->
-<!--                        <button-->
-<!--                            v-if="data.idBukti !== ''"-->
-<!--                            class="pop"-->
-<!--                            @click="openPopup(data.idBukti, 'Pelaksanaan')">-->
-<!--                            Link-->
-<!--                        </button>-->
-<!--                    </td>-->
-
-<!--                        <td colspan="2">-->
-<!--                            <div class="edited">-->
-<!--                            <p>Last edited by: {{data.editorEval}}</p>-->
-<!--                                <el-input-->
-<!--                                    style="width: 240px"-->
-<!--                                    :disabled="data.bukti === ''"-->
-<!--                                    v-model="data.evaluasi"-->
-<!--                                    @input="data.isUpdate = true"-->
-<!--                                    :rows="2"-->
-<!--                                    type="textarea"-->
-<!--                                    placeholder="Please input"-->
-<!--                                />-->
-<!--                            </div>-->
-<!--                        </td>-->
-<!--                        <td colspan="2">-->
-<!--                            <select-->
-<!--                                v-model="data.adjusment"-->
-<!--                                :disabled="data.bukti === ''"-->
-<!--                                @change="data.isUpdate = true">-->
-<!--                                <option value=""></option>-->
-<!--                                <option v-for="a in adjusmentOptions" :key="a">{{ a }}</option>-->
-<!--                            </select>-->
-<!--                        </td>-->
-<!--                        <td>-->
-<!--                            <button-->
-<!--                                v-if="data.idBuktiEval !== ''"-->
-<!--                                class="pop"-->
-<!--                                @click="openPopup(data.idBuktiEval, 'Evaluasi')"-->
-<!--                            >-->
-<!--                                Link-->
-<!--                            </button>-->
-<!--                        </td>-->
-<!--                        <td>-->
-<!--                            <button v-if="data.isUpdate" class="btnn" @click="saveEval(data.idBukti, data.evaluasi, data.adjusment, data.idPelaksanaan, data.id, data.indicator)">save</button>-->
-<!--                            <button v-else >save</button>-->
-<!--                        </td>-->
-<!--                </tr>-->
-<!--            </template>-->
-<!--            </tbody>-->
-<!--        </table>-->
-<!--    </div>-->
 
     <Modal
         v-if="popupTriggers"
@@ -346,23 +276,10 @@ const openPopup = (indicator, tipe) => {
 
 <style scoped>
 
-.btnn{
-    background: yellow;
-}
-
-
-
-.ta{
-    height: 10rem;
-}
-
-.Evaluasi {
-    width: 120vw;
-    margin-top: 1rem;
-}
-
-.xd{
-    width: 30rem;
+.custom-card {
+    --p-card-shadow: 0px 3px 4px rgba(0, 0, 0, 0.4);
+    //--p-card-body-padding: 10px;
+    width: 100%; height: 9rem; overflow: hidden
 }
 
 textarea {

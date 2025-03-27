@@ -12,7 +12,7 @@ import Aura from "@primeuix/themes/aura";
 import {
     AutoComplete,
     Avatar,
-    Button,
+    Button, Card,
     Column,
     ColumnGroup,
     DataTable,
@@ -28,11 +28,11 @@ import {
     Password,
     ProgressSpinner,
     Ripple,
-    Row,
+    Row, ScrollPanel,
     Select,
     Skeleton,
     Textarea,
-    TieredMenu,
+    TieredMenu, Toast,
     Toolbar,
 } from "primevue";
 
@@ -51,10 +51,13 @@ appVue.use(ToastService);
 appVue.use(ConfirmationService);
 appVue.use(DialogService);
 appVue.component("Form", Form);
+appVue.component("Toast", Toast);
 appVue.component("Avatar", Avatar);
 appVue.component("Menubar", Menubar);
 appVue.component("Button", Button);
 appVue.component("Image", Image);
+appVue.component("Card", Card);
+appVue.component("ScrollPanel", ScrollPanel);
 appVue.component("InputText", InputText);
 appVue.component("InputIcon", InputIcon);
 appVue.component("IconField", IconField);
