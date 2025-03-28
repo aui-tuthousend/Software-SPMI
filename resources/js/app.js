@@ -33,7 +33,7 @@ import {
     Skeleton,
     Textarea,
     TieredMenu, Toast,
-    Toolbar,
+    Toolbar, Tooltip,
 } from "primevue";
 
 const appVue = createApp(app);
@@ -50,6 +50,7 @@ appVue.use(PrimeVue, {
 appVue.use(ToastService);
 appVue.use(ConfirmationService);
 appVue.use(DialogService);
+appVue.directive('tooltip', Tooltip)
 appVue.component("Form", Form);
 appVue.component("Toast", Toast);
 appVue.component("Avatar", Avatar);

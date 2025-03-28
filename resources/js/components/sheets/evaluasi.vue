@@ -2,21 +2,18 @@
 import { defineAsyncComponent, ref } from "vue";
 import {useConfirm, useToast} from "primevue";
 import ConfirmPopup from 'primevue/confirmpopup';
-
-const confirm = useConfirm();
-const toast = useToast();
 const Modal = defineAsyncComponent({
     loader: () => import('../sheets/modal.vue'),
 });
-
-
 const props = defineProps({
     data: Object,
     role: String,
 });
-
 const emit = defineEmits(['submit-data', 'update']);
 
+const confirm = useConfirm();
+const toast = useToast();
+const visible = ref(false);
 const isEditing = ref(false);
 const username = localStorage.getItem('name');
 
@@ -25,10 +22,10 @@ const selectedAdjusment = ref('');
 
 const saveEval =(data, event) => {
     if (!data.adjusment){
-        toast.add({ severity: 'error', summary: 'Error Saving', detail: 'Please Fill the Adjusment', life: 3000 });
+        toast.add({ severity: 'warn', summary: 'Error Saving', detail: 'Please Fill the Adjusment', life: 3000 });
         return;
     } else if (!data.evaluasi){
-        toast.add({ severity: 'error', summary: 'Error Saving', detail: 'Please Fill the Evaluasi', life: 3000 });
+        toast.add({ severity: 'warn', summary: 'Error Saving', detail: 'Please Fill the Evaluasi', life: 3000 });
         return;
     }
 
@@ -164,8 +161,8 @@ const openPopup = (indicator, tipe) => {
                     class="h-[10rem] flex items-center justify-center"
                 >
                     <Button
-                        @click="openPopup(indicator.idBukti, 'Pelaksanaan')"
                         v-if="indicator.idBukti"
+                        @click="openPopup(indicator.idBukti, 'Pelaksanaan')"
                         severity="contrast"
                         variant="outlined"
                         raised
@@ -184,6 +181,7 @@ const openPopup = (indicator, tipe) => {
 
                     <FloatLabel variant="on" >
                         <Textarea
+                            v-tooltip.top="{ value: 'Input Evaluasi', showDelay: 500, hideDelay: 300 }"
                             :disabled="isEditing && !indicator.isUpdate"
                             v-model="indicator.evaluasi"
                             @input="indicator.isUpdate = true; isEditing = true"
@@ -261,10 +259,23 @@ const openPopup = (indicator, tipe) => {
                 </div>
             </template>
         </Column>
-
-
     </DataTable>
 
+    <Dialog v-model:visible="visible" modal header="Edit Profile" :style="{ width: '25rem' }">
+        <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
+        <div class="flex items-center gap-4 mb-4">
+            <label for="username" class="font-semibold w-24">Username</label>
+            <InputText id="username" class="flex-auto" autocomplete="off" />
+        </div>
+        <div class="flex items-center gap-4 mb-8">
+            <label for="email" class="font-semibold w-24">Email</label>
+            <InputText id="email" class="flex-auto" autocomplete="off" />
+        </div>
+        <div class="flex justify-end gap-2">
+            <Button type="button" label="Cancel" severity="secondary" @click="visible = false"></Button>
+            <Button type="button" label="Save" @click="visible = false"></Button>
+        </div>
+    </Dialog>
     <Modal
         v-if="popupTriggers"
         :togglePopup="togglePopup"

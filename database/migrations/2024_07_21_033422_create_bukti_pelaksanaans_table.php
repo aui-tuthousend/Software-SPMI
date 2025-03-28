@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('bukti_pelaksanaans', function (Blueprint $table) {
             $table->id();
             $table->longText('komentar');
+            $table->string('edited_by');
             $table->unsignedBigInteger('id_pelaksanaan');
             $table->unsignedBigInteger('id_indikator');
             $table->timestamps();
