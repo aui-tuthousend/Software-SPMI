@@ -1,30 +1,45 @@
-<script setup>
-import { defineAsyncComponent, ref } from "vue";
+<script setup lang="ts">
+import {defineAsyncComponent, toRefs, ref, watch} from "vue";
 import {useConfirm, useToast} from "primevue";
 import ConfirmPopup from 'primevue/confirmpopup';
+import {useEvaluasi, submitEvaluasi, fetchEvaluasi} from '../stores/useEvaluasi'
 const Modal = defineAsyncComponent({
     loader: () => import('../sheets/modal.vue'),
 });
-const props = defineProps({
-    data: Object,
-    role: String,
-});
-const emit = defineEmits(['submit-data', 'update']);
+const props = defineProps<{
+    jurusan: string,
+    periode: string,
+    tipeSheet: string,
+    tipe: string,
+}>();
 
+const { jurusan, periode, tipeSheet, tipe } = toRefs(props);
+
+const role = localStorage.getItem("userRole");
+const username = localStorage.getItem('name');
 const confirm = useConfirm();
 const toast = useToast();
+
 const visible = ref(false);
 const isEditing = ref(false);
-const username = localStorage.getItem('name');
-
+const popupTriggers = ref(false);
+const selectedIndicator = ref(null);
+const tipeLink = ref(null);
 const adjusmentOptions = ref(['melampaui', 'mencapai', 'belum mencapai', 'menyimpang']);
-const selectedAdjusment = ref('');
 
-const saveEval =(data, event) => {
+// onMounted(async ()=> {
+//     console.log(useEvaluasi.list)
+// })
+
+watch([tipe, tipeSheet], async ()=> {
+    await fetchEvaluasi(props.jurusan, props.periode, props.tipeSheet, props.tipe);
+}, {immediate: true})
+
+const saveEval = (data, event) => {
     if (!data.adjusment){
         toast.add({ severity: 'warn', summary: 'Error Saving', detail: 'Please Fill the Adjusment', life: 3000 });
         return;
-    } else if (!data.evaluasi){
+    } else if (!data.komentarEvaluasi){
         toast.add({ severity: 'warn', summary: 'Error Saving', detail: 'Please Fill the Evaluasi', life: 3000 });
         return;
     }
@@ -34,18 +49,10 @@ const saveEval =(data, event) => {
         group: 'headless',
         message: 'Save your current process?',
         accept: () => {
-            const newData = {
-                idBuktiPelaksanaan: data.idBukti,
-                komentarEvaluasi: data.evaluasi,
-                adjusment: data.adjusment,
-                idEvaluasi: data.idPelaksanaan,
-                userName: username,
-                idInd: data.id,
-                indicator: data.indicator,
-            };
-            emit('submit-data', newData)
+            useEvaluasi.initial(data)
+            submitEvaluasi()
             isEditing.value = false
-            // toast.add({severity:'info', summary:'Confirmed', detail:'You have accepted', life: 3000});
+            toast.add({severity:'info', summary:'Confirmed', detail:'You have accepted', life: 3000});
         },
         reject: () => {
             toast.add({severity:'error', summary:'Rejected', detail:'You have rejected', life: 3000});
@@ -53,12 +60,6 @@ const saveEval =(data, event) => {
     });
 };
 
-function submit(){
-}
-
-const popupTriggers = ref(false);
-const selectedIndicator = ref(null);
-const tipeLink = ref(null);
 
 const togglePopup = () => {
     popupTriggers.value = !popupTriggers.value;
@@ -86,9 +87,8 @@ const openPopup = (indicator, tipe) => {
             </div>
         </template>
     </ConfirmPopup>
-
     <DataTable
-        :value="props.data"
+        :value="useEvaluasi.list"
         showGridlines
         tableStyle="min-width: 130vw"
         class="custom-table"
@@ -101,7 +101,7 @@ const openPopup = (indicator, tipe) => {
                 <Column header="Save" :rowspan="2" />
             </Row>
             <Row>
-                <Column header="Standar"/>
+                <Column header="Standar" style="width: 10px"/>
                 <Column header="Indikator"/>
                 <Column header="Target"/>
                 <Column header="Komentar"/>
@@ -111,10 +111,23 @@ const openPopup = (indicator, tipe) => {
                 <Column header="Link Bukti Evaluasi"/>
             </Row>
         </ColumnGroup>
-        <Column field="standar" />
+        <Column field="standar" header="Standar">
+            <template #body="{ data }">
+                <Skeleton v-if="useEvaluasi.loading" width="100px" height="16px" />
+                <span
+                    v-else
+                >
+                    {{ data.standar }}
+                </span>
+            </template>
+        </Column>
         <Column field="indicators">
             <template #body="slotProps">
-                <div
+                <span v-if="useEvaluasi.loading">
+                    <Skeleton width="150px" height="16px" />
+                </span>
+                <span
+                    v-else
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
                     class="h-[10rem] w-[20rem] flex items-center justify-center"
@@ -123,12 +136,16 @@ const openPopup = (indicator, tipe) => {
                         v-model="indicator.indicator"
                         style="resize: none; height: 9rem"
                     />
-                </div>
+                </span>
             </template>
         </Column>
         <Column field="indicators">
             <template #body="slotProps">
+                <span v-if="useEvaluasi.loading">
+                    <Skeleton width="150px" height="16px" />
+                </span>
                 <div
+                    v-else
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
                     class="h-[10rem] flex items-center justify-center"
@@ -139,7 +156,11 @@ const openPopup = (indicator, tipe) => {
         </Column>
         <Column field="indicators">
             <template #body="slotProps">
+                <span v-if="useEvaluasi.loading">
+                    <Skeleton width="150px" height="16px" />
+                </span>
                 <div
+                    v-else
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
                     class="h-[10rem] w-[20rem] flex items-center justify-start"
@@ -158,14 +179,18 @@ const openPopup = (indicator, tipe) => {
         </Column>
         <Column field="indicators">
             <template #body="slotProps">
+                <span v-if="useEvaluasi.loading">
+                    <Skeleton width="150px" height="16px" />
+                </span>
                 <div
+                    v-else
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
                     class="h-[10rem] flex items-center justify-center"
                 >
                     <Button
-                        v-if="indicator.idBukti"
-                        @click="openPopup(indicator.idBukti, 'Pelaksanaan')"
+                        v-if="indicator.idBuktiPelaksanaan"
+                        @click="openPopup(indicator.idBuktiPelaksanaan, 'Pelaksanaan')"
                         severity="contrast"
                         variant="outlined"
                         raised
@@ -176,7 +201,11 @@ const openPopup = (indicator, tipe) => {
         </Column>
         <Column field="indicators">
             <template #body="slotProps">
+                <span v-if="useEvaluasi.loading">
+                    <Skeleton width="150px" height="16px" />
+                </span>
                 <div
+                    v-else
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
                     class="h-[10rem] w-[20rem] flex items-center justify-center"
@@ -186,13 +215,13 @@ const openPopup = (indicator, tipe) => {
                         <Textarea
                             v-tooltip.top="{ value: 'Input Evaluasi', showDelay: 500, hideDelay: 300 }"
                             :disabled="isEditing && !indicator.isUpdate"
-                            v-model="indicator.evaluasi"
+                            v-model="indicator.komentarEvaluasi"
                             @input="indicator.isUpdate = true; isEditing = true"
                             style="resize: none; height: 9rem; width: 20rem"
                         />
                         <label
                             for="on_label"
-                            v-if="indicator.evaluasi"
+                            v-if="indicator.komentarEvaluasi"
                         >Last Edited by: {{indicator.editorEval}}</label>
                     </FloatLabel>
 
@@ -201,7 +230,11 @@ const openPopup = (indicator, tipe) => {
         </Column>
         <Column field="indicators">
             <template #body="slotProps">
+                <span v-if="useEvaluasi.loading">
+                    <Skeleton width="150px" height="16px" />
+                </span>
                 <div
+                    v-else
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
                     class="h-[10rem] flex items-center justify-center"
@@ -219,7 +252,11 @@ const openPopup = (indicator, tipe) => {
         </Column>
         <Column field="indicators">
             <template #body="slotProps">
+                <span v-if="useEvaluasi.loading">
+                    <Skeleton width="150px" height="16px" />
+                </span>
                 <div
+                    v-else
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
                     class="h-[10rem] flex items-center justify-center"
@@ -240,7 +277,11 @@ const openPopup = (indicator, tipe) => {
 
         <Column field="indicators">
             <template #body="slotProps">
+                <span v-if="useEvaluasi.loading">
+                    <Skeleton width="150px" height="16px" />
+                </span>
                 <div
+                    v-else
                     v-for="(indicator, index) in slotProps.data.indicators"
                     :key="index"
                     class="h-[10rem] flex items-center justify-center"
