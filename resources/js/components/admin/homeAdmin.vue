@@ -220,6 +220,58 @@
                     </div>
                 </template>
             </Dialog>
+
+            <!-- Reset Password Dialog -->
+            <Dialog
+                v-model:visible="showResetModal"
+                modal
+                header="Reset User Password"
+                :style="{ width: '450px' }"
+                class="p-fluid"
+            >
+                <div class="flex items-center gap-4 mb-4">
+                    <label class="font-semibold w-24">User</label>
+                    <div class="flex-auto">
+                        <span class="font-medium">{{ selectedUser?.name }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="newPassword" class="font-semibold w-24">New Password</label>
+                    <div class="flex-auto flex flex-col">
+                        <Password
+                            id="newPassword"
+                            v-model="newPassword"
+                            required
+                            toggleMask
+                            :class="{ 'p-invalid': resetSubmitted && !newPassword }"
+                        />
+                        <small
+                            v-if="resetSubmitted && !newPassword"
+                            class="text-red-500 flex-1"
+                        >Password is required.</small>
+                    </div>
+                </div>
+
+                <template #footer>
+                    <div class="flex justify-end gap-2">
+                        <Button
+                            label="Cancel"
+                            icon="pi pi-times"
+                            @click="showResetModal = false"
+                            class="p-button-text"
+                            style="width: auto"
+                        />
+                        <Button
+                            label="Reset Password"
+                            icon="pi pi-check"
+                            @click="resetUserPassword"
+                            autofocus
+                            style="width: auto"
+                        />
+                    </div>
+                </template>
+            </Dialog>
         </div>
     </main>
 </template>
@@ -245,11 +297,16 @@ const {
     registerUser,
     closeModal,
     updateUserRole,
+    showResetModal,
+    newPassword,
+    resetSubmitted,
+    resetUserPassword,
 } = useUserManagement();
 
 const { menuItems, toggleMenu } = useUserActions(
     (value) => (showEditModal.value = value),
-    (value) => (selectedUser.value = value)
+    (value) => (selectedUser.value = value),
+    (value) => (showResetModal.value = value)
 );
 
 onMounted(() => {
