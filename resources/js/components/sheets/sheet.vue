@@ -86,61 +86,64 @@ onBeforeMount(() => {
 </script>
 
 <template>
-    <div class="c1">
-        <router-link class="pop" to="/">Home</router-link>
+    <div class="max-h-full h-full w-full">
         <Toast />
-        <p>tipe:</p>
-        <select v-model="currentSheet" class="tipe" required>
-            <option v-for="t in tipeSheet" :key="t">{{ t }}</option>
-        </select>
+        <Panel class="w-full overflow-x-hidden">
+            <div class="w-full card flex justify-center">
+                <Stepper value="Input" class="p-stepper">
+                    <StepList>
+                        <Step value="Input" @click="current = 'Input'"></Step>
+                        <Step value="Proses" @click="current = 'Proses'"></Step>
+                        <Step value="Output" @click="current = 'Output'"></Step>
+                    </StepList>
+                </Stepper>
+            </div>
 
-        <br><br>
+            <div v-if="standarData === 'Null'">
+                Belum ada data :)
+            </div>
 
-        <template v-for="t in tipe">
-            <input type="radio" :id="t" :value="t" v-model="current">
-            <label :for="t" style="margin-right: 0.5rem;">{{ t }}</label>
-        </template>
-
-        <div v-if="standarData === 'Null'">
-            Belum ada data :)
-        </div>
-
-        <div v-else class="dt">
-            <input v-if="role !== null" v-model="search" placeholder="Search Standars">
-            <Pelaksanaan
-                v-if="role=== 'Pelaksanaan'"
-                :data="filtered"
-                :role="role"
-                @submit-data="submitData"
-                @update="(data) => update = data"></Pelaksanaan>
-            <evaluasi
-                v-else-if="role=== 'Evaluasi'"
-                :data="standarData"
-                :role="role"
-                @submit-data="submitData"
-                @update="(data) => update = data"></evaluasi>
-            <pengendalian
-                v-else-if="role=== 'Pengendalian'"
-                :data="filtered"
-                :role="role"
-                @submit-data="submitData"
-                @update="(data) => update = data">
-            </pengendalian>
-            <peningkatan
-                v-else-if="role=== 'Peningkatan'"
-                :data="filtered"
-                @submit-data="submitData"
-                @update="(data) => update = data">
-            </peningkatan>
-        </div>
+            <div v-else class="dt">
+<!--                <input v-if="role !== null" v-model="search" placeholder="Search Standars">-->
+                <Pelaksanaan
+                        v-if="role=== 'Pelaksanaan'"
+                        :data="filtered"
+                        :role="role"
+                        @submit-data="submitData"
+                        @update="(data) => update = data"></Pelaksanaan>
+                <evaluasi
+                        v-else-if="role=== 'Evaluasi'"
+                        :data="standarData"
+                        :role="role"
+                        @submit-data="submitData"
+                        @update="(data) => update = data"></evaluasi>
+                <pengendalian
+                        v-else-if="role=== 'Pengendalian'"
+                        :data="filtered"
+                        :role="role"
+                        @submit-data="submitData"
+                        @update="(data) => update = data">
+                </pengendalian>
+                <peningkatan
+                        v-else-if="role=== 'Peningkatan'"
+                        :data="filtered"
+                        @submit-data="submitData"
+                        @update="(data) => update = data">
+                </peningkatan>
+            </div>
+        </Panel>
     </div>
 </template>
 
 <style scoped>
-.c1 {
-    position: absolute;
-    width: 100vw;
-    padding: 3%;
+
+.p-stepper {
+    --p-stepper-separator-size: 2px;
+    --p-stepper-step-number-border-radius: 3px;
+    --p-stepper-step-number-border-color: none;
+    --p-stepper-step-number-shadow: none;
+    width: 80%;
+    margin-top: -1rem;
 }
 
 button {
@@ -148,13 +151,6 @@ button {
     height: 1rem;
 }
 
-.dt{
-    padding-bottom: 1%;
-}
 
-.pop {
-    padding: 3px;
-    height: 2rem;
-}
 
 </style>

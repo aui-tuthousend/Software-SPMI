@@ -27,9 +27,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="max-h-full h-full overflow-auto">
+    <div class="max-h-full h-full w-full">
         <Toast />
-        <div class="px-6 py-3">
+        <div>
             <Homepage v-if="page === 'home'" />
             <Import v-if="page === 'import'" />
         </div>
@@ -69,7 +69,7 @@ onMounted(() => {
 .login {
     cursor: pointer;
 }
-/* 
+/*
 .content {
     display: flex;
     z-index: 0;

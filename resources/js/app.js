@@ -24,13 +24,13 @@ import {
     InputText,
     Menu,
     Menubar,
-    MultiSelect,
+    MultiSelect, Panel,
     Password,
     ProgressSpinner,
     Ripple,
     Row, ScrollPanel,
     Select,
-    Skeleton,
+    Skeleton, Step, StepItem, StepList, StepPanel, StepPanels, Stepper,
     Textarea,
     TieredMenu, Toast,
     Toolbar, Tooltip,
@@ -59,6 +59,7 @@ appVue.component("Button", Button);
 appVue.component("Image", Image);
 appVue.component("Card", Card);
 appVue.component("ScrollPanel", ScrollPanel);
+appVue.component("Panel", Panel);
 appVue.component("InputText", InputText);
 appVue.component("InputIcon", InputIcon);
 appVue.component("IconField", IconField);
@@ -78,5 +79,12 @@ appVue.component("Toolbar", Toolbar);
 appVue.component("Skeleton", Skeleton);
 appVue.component("Menu", Menu);
 appVue.component("Dialog", Dialog);
+appVue.component("Stepper", Stepper);
+appVue.component("StepList", StepList);
+appVue.component("StepPanels", StepPanels);
+appVue.component("StepItem", StepItem);
+appVue.component("Step", Step);
+appVue.component("StepPanel", StepPanel);
 appVue.directive("ripple", Ripple);
+
 appVue.mount("#app");

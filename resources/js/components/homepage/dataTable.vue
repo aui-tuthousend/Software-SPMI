@@ -149,8 +149,9 @@ const navigateToSuperUser = () => {
         <div class="flex flex-col gap-4 w-full max-w-4xl">
             <div class="card">
                 <!-- Table (only rendered after data is fetched) -->
-                <div class="top-0 bg-white">
+                <div class="top-0 bg-white w-full">
                     <DataTable
+                        class="w-full"
                         :value="loading ? Array(10).fill(null) : filteredData"
                         v-model:selection="selectedRow"
                         v-model:filters="filters"
@@ -161,7 +162,6 @@ const navigateToSuperUser = () => {
                         selectionMode="single"
                         filterDisplay="row"
                         :globalFilterFields="['jurusan', 'periode', 'tipe']"
-                        tableStyle="min-width: 50rem"
                         @row-select="onRowSelect"
                     >
                         <template #header>
