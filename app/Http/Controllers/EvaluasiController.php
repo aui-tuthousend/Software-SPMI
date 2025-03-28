@@ -4,65 +4,120 @@ namespace App\Http\Controllers;
 
 use App\Models\BuktiEvaluasi;
 use App\Models\BuktiPelaksanaan;
+use App\Models\BuktiPengendalian;
 use App\Models\Indikator;
 use App\Models\link;
+use App\Models\Penetapan;
+use App\Models\Peningkatan;
+use App\Models\Sheet;
+use App\Models\Standar;
+use App\Models\Target;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use App\Models\Evaluasi;
 use Illuminate\Support\Facades\Log;
 
 class EvaluasiController extends Controller {
-    //
-    public function postComment(Request $request) {
-        // Log::info('posting BuktiEvaluasi');
-        $bukti_evaluasi = $request->json()->all()['data'];
 
-        // Ensure $data is always an array for consistent processing
-        $bukti_evaluasi = is_array($bukti_evaluasi) && isset($bukti_evaluasi[0]['idBuktiPelaksanaan']) ? $bukti_evaluasi : [$bukti_evaluasi];
-//        $bukti_evaluasi = is_array($bukti_evaluasi) && isset($data[0]['idBuktiPelaksanaan']) ? $bukti_evaluasi : [$bukti_evaluasi];
+    public function getEvaluasi($jurusan, $periode, $tipePendidikan, $tipe) {
+        $sheets = Sheet::where('jurusan', '=', $jurusan)
+            ->where('periode', '=', $periode)
+            ->where('tipe_sheet', '=', $tipePendidikan)
+            ->get();
 
-        // loop to check if id bukti pelaksanaan valid
-        $buktiValid = [];
-        foreach ($bukti_evaluasi as $bukti) {
-            // Check if each bukti contains the necessary fields
-            if (!isset($bukti['adjustment']) || !isset($bukti['komentarEvaluasi']) || !isset($bukti['idBuktiPelaksanaan']) || !isset($bukti['idEvaluasi'])) {
-                // Log::info('Invalid data format', $bukti);
-                return $this->sendError('Data harus memiliki idBuktiPelaksanaan, komentarEvaluasi, dan adjustment yang valid', $bukti);
-            }
-
-            // query to check id is match with $id_pelaksanaan return boolean
-            $id_bukti_pelaksanaan = $bukti['idBuktiPelaksanaan'];
-            $isExist = BuktiPelaksanaan::where('id', $id_bukti_pelaksanaan)->exists();
-            // Log::info($isExist);
-            if (!$isExist) {
-                // Log::warning($bukti);
-                return $this->sendError('Id bukti pelaksanaan tidak valid', $bukti);
-            }
-            $buktiValid[] = $bukti;
+        if ($sheets->isEmpty()) {
+            return response()->json("Null");
         }
 
-        // Create valid bukti evaluasi
-        foreach ($buktiValid as $bukti) {
-            // Log::info('Creating bukti: ', $bukti);
-            BuktiEvaluasi::create([
-                'adjustment' => $bukti['adjustment'],
-                'komentar' => $bukti['komentarEvaluasi'],
-                'id_evaluasi' => $bukti['idEvaluasi'],
-                'id_bukti_pelaksanaan' => $bukti['idBuktiPelaksanaan'],
-            ]);
+        $respond = [];
+        foreach ($sheets as $shiit) {
+            $penetapan = Penetapan::where('id_sheet', '=', $shiit->id)->first();
+            $evaluasi = Evaluasi::where('id_sheet', '=', $shiit->id)->first();
+            if ($penetapan) {
+                $standars = Standar::where('id_penetapan', $penetapan->id)->where('tipe', '=', $tipe)->get();
+                $indikator = Indikator::all();
+                $target = Target::all();
+                $bukti = BuktiPelaksanaan::all();
+                $buktieval = BuktiEvaluasi::all();
+
+                foreach ($standars as $s) {
+                    $data = [
+                        'standar' => $s->note,
+                        'indicators' => []
+                    ];
+
+                    foreach ($indikator as $i) {
+                        if ($i->id_standar == $s->id) {
+                            $tar = null;
+                            foreach ($target as $t) {
+                                if ($t->id_indikator == $i->id) {
+                                    $tar = $t;
+                                }
+                            }
+
+                            $buk = '';
+                            $idB = '';
+                            $pelaksanaanEditor = '';
+                            $eva = '';
+                            $adj = '';
+                            $evalEditor = '';
+                            $idE = '';
+                            $idBE = '';
+                            foreach ($bukti as $b) {
+                                if ($b->id_indikator == $i->id) {
+                                    $buk = $b->komentar;
+                                    $idB = $b->id;
+                                    $pelaksanaanEditor = $b->edited_by;
+
+                                    foreach ($buktieval as $e) {
+                                        if ($e->id_bukti_pelaksanaan == $b->id) {
+                                            $idBE = $e->id;
+                                            $eva = $e->komentar;
+                                            $adj = $e->adjustment;
+                                            $idE = $e->id_evaluasi;
+                                            $evalEditor = $e->edited_by;
+                                        }
+                                    }
+                                }
+                            }
+
+                            $newIndicator = [
+                                'idBuktiPelaksanaan' => $idB,
+                                'idPelaksanaan' => $shiit->id,
+                                'komentarEvaluasi' => $eva,
+                                'idIndikator' => $i->id,
+                                'idEvaluasi' => $idE,
+                                'adjusment' => $adj,
+                                'indicator' => $i->note,
+                                'target' => $tar->value,
+
+                                'bukti' => $buk,
+                                'editorPelaksanaan' => $pelaksanaanEditor,
+                                'idBuktiEval' => $idBE,
+                                'editorEval' => $evalEditor,
+                                'isUpdate' => false,
+                            ];
+                            array_push($data['indicators'], $newIndicator);
+                        }
+                    }
+
+                    array_push($respond, $data);
+                }
+            }
         }
-        return $this->sendRespons($bukti, 'create BuktiEvaluasi success');
+
+        return response()->json($respond);
     }
 
     public function submitEval(Request $request){
         $item = $request->input('data');
 
             $idBP = $item['idBuktiPelaksanaan'];
-            $adjusment = $item['adjusment'];
-            $komentarEvaluasi = $item['komentarEvaluasi'];
             $idEvaluasi = $item['idEvaluasi'];
+            $komentarEvaluasi = $item['komentarEvaluasi'];
+            $adjusment = $item['adjusment'];
             $userName = $item['userName'];
-            $idInd = $item['idInd'];
+            $idInd = $item['idIndikator'];
             $indica = $item['indicator'];
 
             $isEval = BuktiEvaluasi::where('id_bukti_pelaksanaan', $idBP)->first();

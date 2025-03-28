@@ -13,9 +13,7 @@ const loading = ref(false);
 
 const tipe = ['input', 'proses', 'output'];
 const current = ref(tipe[0]);
-
 const role = localStorage.getItem("userRole");
-
 const tipeSheet = ['pendidikan', 'penelitian', 'pengabdian'];
 const currentSheet = ref(tipeSheet[0]);
 
@@ -28,15 +26,15 @@ const search = ref('');
 
 let re = ref(0);
 
-if (role !== null){
-    watch([re, periode, jurusan, currentSheet, current], async () => {
-        loading.value = true;
-        let response = await fetch(`/api/getPenetapan/${jurusan.value}/${periode.value}/${currentSheet.value}/${current.value}`);
-        standarData.value = await response.json();
-        loading.value = false;
-        console.log(standarData.value);
-    }, { immediate: true });
-}
+// if (role !== null){
+//     watch([re, periode, jurusan, currentSheet, current], async () => {
+//         loading.value = true;
+//         let response = await fetch(`/api/getPenetapan/${jurusan.value}/${periode.value}/${currentSheet.value}/${current.value}`);
+//         standarData.value = await response.json();
+//         loading.value = false;
+//         console.log(standarData.value);
+//     }, { immediate: true });
+// }
 
 
 const submitData = (formData) => {
@@ -111,12 +109,15 @@ onBeforeMount(() => {
                         :role="role"
                         @submit-data="submitData"
                         @update="(data) => update = data"></Pelaksanaan>
-                <evaluasi
+
+                <Evaluasi
                         v-else-if="role=== 'Evaluasi'"
-                        :data="standarData"
-                        :role="role"
-                        @submit-data="submitData"
-                        @update="(data) => update = data"></evaluasi>
+                        :jurusan="jurusan"
+                        :periode="periode"
+                        :tipeSheet="currentSheet"
+                        :tipe="current"
+                />
+
                 <pengendalian
                         v-else-if="role=== 'Pengendalian'"
                         :data="filtered"
