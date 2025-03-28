@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->enum('adjustment',['melampai','mencapai','belum mencapai','menyimpan']);
             $table->string('komentar');
+            $table->string('edited_by');
             $table->unsignedBigInteger('id_evaluasi');
             $table->unsignedBigInteger('id_bukti_pelaksanaan');
             $table->timestamps();

@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('temuan');
             $table->string('akar_masalah');
-            $table->string('rtl');  
+            $table->string('rtl');
             $table->string('pelaksanaan_rtl');
+            $table->string('edited_by');
             $table->unsignedBigInteger('id_bukti_evaluasi');
             $table->timestamps();
 
