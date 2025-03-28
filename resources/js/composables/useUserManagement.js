@@ -27,6 +27,10 @@ export function useUserManagement() {
   const selectedUser = ref(null);
   const editSubmitted = ref(false);
 
+  const showResetModal = ref(false);
+  const newPassword = ref('');
+  const resetSubmitted = ref(false);
+
   const fetchUsers = async () => {
     try {
       const response = await fetch('/api/admin/listuser');
@@ -107,6 +111,36 @@ export function useUserManagement() {
     }
   };
 
+  const resetUserPassword = async () => {
+    resetSubmitted.value = true;
+
+    if (selectedUser.value && newPassword.value) {
+      try {
+        const response = await axios.post('/api/admin/reset-password', {
+          user_id: selectedUser.value.id,
+          new_password: newPassword.value
+        });
+        
+        toast.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Password reset successfully',
+          life: 3000,
+        });
+        showResetModal.value = false;
+        newPassword.value = '';
+        resetSubmitted.value = false;
+      } catch (error) {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to reset password',
+          life: 3000,
+        });
+      }
+    }
+  };
+
   return {
     users,
     showModal,
@@ -122,5 +156,9 @@ export function useUserManagement() {
     selectedUser,
     editSubmitted,
     updateUserRole,
+    showResetModal,
+    newPassword,
+    resetSubmitted,
+    resetUserPassword,
   };
 } 

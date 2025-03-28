@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 
-export function useUserActions(setShowEditModal, setSelectedUser) {
+export function useUserActions(setShowEditModal, setSelectedUser, showResetModal) {
   const menuItems = ref([
     {
       label: 'View History',
@@ -11,6 +11,14 @@ export function useUserActions(setShowEditModal, setSelectedUser) {
       label: 'Edit Role',
       icon: 'pi pi-user-edit',
       command: (event) => editRole(event.item.instance),
+    },
+    {
+      label: 'Reset Password',
+      icon: 'pi pi-key',
+      command: (event) => {
+        setSelectedUser(event.item.instance);
+        showResetModal(true);
+      },
     },
     {
       label: 'Delete',
@@ -41,7 +49,6 @@ export function useUserActions(setShowEditModal, setSelectedUser) {
   };
 
   const toggleMenu = (event, user, menuRef) => {
-    console.log('Toggling menu', event, user, menuRef);
     menuRef.toggle(event);
     menuItems.value.forEach(item => item.instance = user);
   };

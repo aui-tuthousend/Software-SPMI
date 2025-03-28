@@ -43,3 +43,4 @@ Route::post('/register', [AccountController::class, 'register']);
 Route::get('/admin/listuser', [AccountController::class, 'listUser']);
 Route::post('/admin/registerUser', [AccountController::class, 'register']);
 Route::post('/admin/edit/role', [AccountController::class, 'editUserRole']);
+Route::post('/admin/reset-password', [AccountController::class, 'resetPassword']);

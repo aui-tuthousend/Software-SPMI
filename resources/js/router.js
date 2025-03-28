@@ -1,19 +1,20 @@
 import { createRouter, createWebHistory } from "vue-router";
 import axios from "axios";
-import Home from './components/homepage/home.vue';
-import Sheet from './components/sheets/sheet.vue';
-import SuperUser from './components/sheets/superUser.vue';
-import Importexcel from './components/upload/import.vue';
-import Register from './components/login/register.vue';
-import Login from './components/login/login.vue';
-import NotFound from './components/notFound.vue';
+import Home from "./components/homepage/home.vue";
+import Sheet from "./components/sheets/sheet.vue";
+import SuperUser from "./components/sheets/superUser.vue";
+import Importexcel from "./components/upload/import.vue";
+import Register from "./components/login/register.vue";
+import Login from "./components/login/login.vue";
+import NotFound from "./components/notFound.vue";
 import HomeAdmin from "./components/admin/homeAdmin.vue";
 
 const isAuthenticated = async () => {
     try {
-        axios.defaults.withCredentials = true;
-        await axios.get("/api/user", { withCredentials: true });
-        return true;
+        const response = await axios.get("/api/user", {
+            withCredentials: true,
+        });
+        return response.data;
     } catch (error) {
         return false;
     }
@@ -23,96 +24,121 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
-            path: '/',
+            path: "/",
             component: Home,
             beforeEnter: async (to, from, next) => {
-                if (await isAuthenticated()) {
-                    const role = localStorage.getItem("userRole");
-                    if (role === "Admin") {
-                        next('/admin/dashboard');
+                const user = await isAuthenticated();
+                if (user) {
+                    if (user.role === "Admin") {
+                        next("/admin/dashboard");
                     } else {
                         next();
                     }
                 } else {
-                    next('/login');
+                    next("/login");
                 }
             },
         },
         {
-            path: '/sheet/:jurusan/:periode',
-            name: 'Sheet',
+            path: "/sheet/:jurusan/:periode",
+            name: "Sheet",
             component: Sheet,
             beforeEnter: async (to, from, next) => {
-                if (await isAuthenticated()) {
-                    next();
+                const user = await isAuthenticated();
+                if (user) { 
+                    if (user.role === "Admin") {
+                        next("/admin/dashboard");
+                    } else {
+                        next();
+                    }
                 } else {
-                    next('/login');
+                    next("/login");
                 }
             },
         },
         {
-            path: '/superUser/:jurusan/:periode',
-            name: 'SuperUser',
+            path: "/superUser/:jurusan/:periode",
+            name: "SuperUser",
             component: SuperUser,
             beforeEnter: async (to, from, next) => {
-                if (await isAuthenticated()) {
-                    next();
+                const user = await isAuthenticated();
+                if (user) {
+                    if (user.role === "Evaluasi") {
+                        next();
+                    } else {
+                        next("/");
+                    }
                 } else {
-                    next('/login');
+                    next("/login");
                 }
             },
         },
         {
-            path: '/import',
+            path: "/import",
             component: Importexcel,
             beforeEnter: async (to, from, next) => {
-                if (await isAuthenticated()) {
-                    const role = localStorage.getItem("userRole");
-                    if (role === "Evaluasi") {
+                const user = await isAuthenticated();
+                if (user) {
+                    if (user.role === "Evaluasi") {
                         next();
                     } else {
-                        next('/');
+                        next("/");
                     }
                 } else {
-                    next('/login');
+                    next("/login");
                 }
             },
         },
         {
-            path: '/login',
+            path: "/login",
             component: Login,
+            beforeEnter: async (to, from, next) => {
+                const user = await isAuthenticated();
+                if (user) {
+                    next("/");
+                } else {
+                    next();
+                }
+            },
             meta: {
-                showMenubar: false
+                showMenubar: false,
             },
         },
         {
-            path: '/register',
+            path: "/register",
             component: Register,
+            beforeEnter: async (to, from, next) => {
+                const user = await isAuthenticated();
+                if (user) {
+                    next("/");
+                } else {
+                    next();
+                }
+            },
             meta: {
-                showMenubar: false
+                showMenubar: false,
             },
         },
         {
-            path: '/:pathMatch(.*)*',
+            path: "/:pathMatch(.*)*",
             component: NotFound,
             meta: {
-                showMenubar: false
+                showMenubar: false,
             },
         },
         {
-            path: '/admin/dashboard',
+            path: "/admin/dashboard",
             component: HomeAdmin,
             beforeEnter: async (to, from, next) => {
-                if (await isAuthenticated()) {
-                    const role = localStorage.getItem("userRole");
-                    console.log(role);
-                    if (role === "Admin") {
+                const user = await isAuthenticated();
+                if (user) {
+                    if (user.role === "Admin") {
                         next();
                     } else {
-                        next('/');
+                        next("/");
                     }
                 } else {
-                    next('/login');
+                    next("/login");
                 }
             },
         },

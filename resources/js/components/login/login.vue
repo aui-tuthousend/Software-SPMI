@@ -172,7 +172,6 @@ const login = async (e) => {
             loading.value = false;
 
             localStorage.setItem("name", response.data.name);
-            localStorage.setItem("userRole", response.data.userRole);
             localStorage.setItem(
                 "toastMessage",
                 "Login Berhasil. Selamat Datang"
