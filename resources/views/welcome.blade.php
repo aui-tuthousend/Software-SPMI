@@ -14,35 +14,22 @@
 </head>
 
 <body>
-<div id="app" class="app">
+<div id="app" class="w-screen bg-gray-100 ">
 </div>
 
-<div id="modal" class="Modal">
-
-</div>
 
     <style>
-        body {
-            width: 100vw;
+
+        html{
             overflow-x: hidden;
-            /*padding: 3rem;*/
         }
 
-        /*table,*/
-        /*th,*/
-        /*td {*/
-        /*    border: 1px solid black;*/
-        /*    text-align: center;*/
-        /*    padding: 5px;*/
-        /*    width: 2rem;*/
-        /*}*/
-
-    button{
-        border-style: none;
-        width: 3rem;
-        height: 2rem;
-    }
-</style>
+        button{
+            border-style: none;
+            width: 3rem;
+            height: 2rem;
+        }
+    </style>
 </body>
 
 </html>

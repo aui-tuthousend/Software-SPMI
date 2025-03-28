@@ -71,7 +71,9 @@ const openPopup = (indicator, tipe) => {
 };
 </script>
 
-<template class="table gap-5">
+<template>
+  <div class="w-full h-full">
+
     <Toast />
     <ConfirmPopup group="headless">
         <template #container="{ message, acceptCallback, rejectCallback }">
@@ -84,11 +86,12 @@ const openPopup = (indicator, tipe) => {
             </div>
         </template>
     </ConfirmPopup>
+
     <DataTable
         :value="props.data"
         showGridlines
         tableStyle="min-width: 130vw"
-        style="padding: 5px"
+        class="custom-table"
     >
         <ColumnGroup type="header">
             <Row>
@@ -283,6 +286,7 @@ const openPopup = (indicator, tipe) => {
         :tipe="tipeLink"
         :role="role"
     />
+  </div>
 </template>
 
 <style scoped>
@@ -292,6 +296,13 @@ const openPopup = (indicator, tipe) => {
     //--p-card-body-padding: 10px;
     width: 100%; height: 9rem; overflow: hidden
 }
+
+.custom-table {
+    --p-datatable-header-cell-background: rgba(202, 240, 248, 0.4);
+    --p-datatable-header-cell-text-align: center;
+    padding: 5px;
+}
+
 
 textarea {
     width: 100%;

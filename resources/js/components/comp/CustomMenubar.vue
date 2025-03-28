@@ -1,5 +1,5 @@
 <template>
-    <div class="p-5 max-w-full">
+    <div class="w-full pb-6">
         <Menubar :model="items" class="shadow-xl">
             <template #start>
                 <div class="text-sky-500 text-2xl font-bold">LPMI</div>
