@@ -171,36 +171,6 @@ class SheetController extends Controller {
         return response()->json($responseData, 200);
     }
 
-    public function submitPelaksanaan(Request $request) {
-        $item = $request->input('data');
-
-        $idIndikator = $item['idIndikator'];
-        $bukti = $item['bukti'];
-        $idPelaksanaan = $item['idPelaksanaan'];
-        $userName = $item['userName'];
-
-        $buktiPelaksanaan = BuktiPelaksanaan::where('id_indikator', $idIndikator)->first();
-
-        if ($buktiPelaksanaan) {
-            if ($bukti !== null) {
-                $buktiPelaksanaan->komentar = $bukti;
-                $buktiPelaksanaan->edited_by = $userName;
-                $buktiPelaksanaan->save();
-            }
-        } else {
-            if ($bukti !== null) {
-                BuktiPelaksanaan::create([
-                    'id_pelaksanaan' => $idPelaksanaan,
-                    'id_indikator' => $idIndikator,
-                    'komentar' => $bukti,
-                    'edited_by' => $userName,
-                ]);
-            }
-        }
-
-        return response('all good');
-    }
-
     public function downloadExcel() {
         return response()->download(storage_path('../dokumentasi/example.xlsx'));
     }

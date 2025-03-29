@@ -143,10 +143,10 @@ const navigateToSuperUser = () => {
 
 <template>
     <main
-        class="min-w-full w-full flex flex-col items-center justify-center bg-white rounded-lg shadow-lg"
+        class="min-w-full w-full flex flex-col items-center justify-center bg-white rounded-lg shadow-lg py-4"
     >
         <!-- Your content here -->
-        <div class="flex flex-col gap-4 w-full max-w-4xl">
+        <div class="flex flex-col gap-4 w-[90%]">
             <div class="card">
                 <!-- Table (only rendered after data is fetched) -->
                 <div class="top-0 bg-white w-full">
