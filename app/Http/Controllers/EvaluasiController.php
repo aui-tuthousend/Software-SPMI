@@ -32,7 +32,6 @@ class EvaluasiController extends Controller {
         $respond = [];
         foreach ($sheets as $shiit) {
             $penetapan = Penetapan::where('id_sheet', '=', $shiit->id)->first();
-            $evaluasi = Evaluasi::where('id_sheet', '=', $shiit->id)->first();
             if ($penetapan) {
                 $standars = Standar::where('id_penetapan', $penetapan->id)->where('tipe', '=', $tipe)->get();
                 $indikator = Indikator::all();
@@ -86,7 +85,7 @@ class EvaluasiController extends Controller {
                                 'idPelaksanaan' => $shiit->id,
                                 'komentarEvaluasi' => $eva,
                                 'idIndikator' => $i->id,
-                                'idEvaluasi' => $idE,
+                                'idEvaluasi' => $shiit->id,
                                 'adjusment' => $adj,
                                 'indicator' => $i->note,
                                 'target' => $tar->value,
@@ -109,8 +108,10 @@ class EvaluasiController extends Controller {
         return response()->json($respond);
     }
 
-    public function submitEval(Request $request){
-        $item = $request->input('data');
+    public function submitEval(Request $request)
+    {
+        try {
+            $item = $request->input('data');
 
             $idBP = $item['idBuktiPelaksanaan'];
             $idEvaluasi = $item['idEvaluasi'];
@@ -126,7 +127,6 @@ class EvaluasiController extends Controller {
                 $isEval->komentar = $komentarEvaluasi;
                 $isEval->adjustment = $adjusment;
                 $isEval->edited_by  = $userName;
-
                 $isEval->save();
             } else {
                 BuktiEvaluasi::create([
@@ -139,13 +139,23 @@ class EvaluasiController extends Controller {
             }
 
             $indicator = Indikator::find($idInd);
-            if ($indicator->note != $indica){
+            if ($indicator && $indicator->note != $indica) {
                 $indicator->note = $indica;
-
                 $indicator->save();
             }
 
-        return response()->json('all good');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data berhasil disimpan'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat menyimpan data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 

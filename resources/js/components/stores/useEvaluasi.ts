@@ -11,7 +11,6 @@ interface EvaluasiPayload {
     indicator: string;
 }
 
-// Store Evaluasi dengan reactive()
 export const useEvaluasi = reactive({
     loading: false,
     list: [],
@@ -30,14 +29,16 @@ export const useEvaluasi = reactive({
         this.model.idIndikator = data?.idIndikator || '';
         this.model.komentarEvaluasi = data?.komentarEvaluasi || '';
         this.model.adjusment = data?.adjusment || '';
-        this.model.userName = data?.userName || '';
+        // this.model.userName = data?.userName || '';
         this.model.indicator = data?.indicator || '';
     },
+    setUserName(userName: string) {
+        this.model.userName = userName;
+    }
 });
 
-// Fungsi untuk mengirim data Evaluasi (digabung dari fetchEvaluasi & saveEvaluasi)
 export async function submitEvaluasi() {
-    useEvaluasi.loading = true;
+    // useEvaluasi.loading = true;
     try {
         const token = localStorage.getItem('token');
         const response = await axios.post('/api/submitEvaluasi', { data: useEvaluasi.model }, {
@@ -45,17 +46,18 @@ export async function submitEvaluasi() {
                 "Authorization": `Bearer ${token}`
             }
         });
+        console.log('Data submitted successfully:', response.status);
 
-        console.log('Data submitted successfully:', response.data);
+        return response.status
     } catch (error) {
         console.error('Error submitting data:', error.response?.data || error.message);
     } finally {
-        useEvaluasi.loading = false;
+        // useEvaluasi.loading = false;
     }
 }
 
 export async function fetchEvaluasi(jurusan: string, periode: string, currentSheet: string, current: string) {
-    useEvaluasi.loading = true;
+    // useEvaluasi.loading = true;
     try {
         const response = await fetch(`/api/getEvaluasi/${jurusan}/${periode}/${currentSheet}/${current}`);
 
@@ -68,7 +70,7 @@ export async function fetchEvaluasi(jurusan: string, periode: string, currentShe
     } catch (error) {
         console.error('Error fetching data:', error.message);
     } finally {
-        useEvaluasi.loading = false;
+        // useEvaluasi.loading = false;
     }
 }
 

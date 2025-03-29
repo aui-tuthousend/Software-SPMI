@@ -87,15 +87,6 @@ onBeforeMount(() => {
     <div class="max-h-full h-full w-full">
         <Toast />
         <Panel class="w-full overflow-x-hidden">
-            <div class="w-full card flex justify-center">
-                <Stepper value="Input" class="p-stepper">
-                    <StepList>
-                        <Step value="Input" @click="current = 'Input'"></Step>
-                        <Step value="Proses" @click="current = 'Proses'"></Step>
-                        <Step value="Output" @click="current = 'Output'"></Step>
-                    </StepList>
-                </Stepper>
-            </div>
 
             <div v-if="standarData === 'Null'">
                 Belum ada data :)
@@ -105,17 +96,16 @@ onBeforeMount(() => {
 <!--                <input v-if="role !== null" v-model="search" placeholder="Search Standars">-->
                 <Pelaksanaan
                         v-if="role=== 'Pelaksanaan'"
-                        :data="filtered"
-                        :role="role"
-                        @submit-data="submitData"
-                        @update="(data) => update = data"></Pelaksanaan>
+                        :jurusan="jurusan"
+                        :periode="periode"
+                        :tipeSheet="currentSheet"
+                />
 
                 <Evaluasi
                         v-else-if="role=== 'Evaluasi'"
                         :jurusan="jurusan"
                         :periode="periode"
                         :tipeSheet="currentSheet"
-                        :tipe="current"
                 />
 
                 <pengendalian

@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BuktiEvaluasi;
 use App\Models\BuktiPelaksanaan;
+use App\Models\Indikator;
 use App\Models\link;
+use App\Models\Penetapan;
+use App\Models\Sheet;
+use App\Models\Standar;
+use App\Models\Target;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -72,6 +78,116 @@ class PelaksanaanController extends Controller {
         return response()->json(['message' => 'Comment deleted successfully.']);
     }
 
+    public function getPelaksanaan($jurusan, $periode, $tipePendidikan, $tipe) {
+        $sheets = Sheet::where('jurusan', '=', $jurusan)
+            ->where('periode', '=', $periode)
+            ->where('tipe_sheet', '=', $tipePendidikan)
+            ->get();
+
+        if ($sheets->isEmpty()) {
+            return response()->json("Null");
+        }
+
+        $respond = [];
+        foreach ($sheets as $shiit) {
+            $penetapan = Penetapan::where('id_sheet', '=', $shiit->id)->first();
+            if ($penetapan) {
+                $standars = Standar::where('id_penetapan', $penetapan->id)->where('tipe', '=', $tipe)->get();
+                $indikator = Indikator::all();
+                $target = Target::all();
+                $bukti = BuktiPelaksanaan::all();
+
+                foreach ($standars as $s) {
+                    $data = [
+                        'standar' => $s->note,
+                        'indicators' => []
+                    ];
+
+                    foreach ($indikator as $i) {
+                        if ($i->id_standar == $s->id) {
+                            $tar = null;
+                            foreach ($target as $t) {
+                                if ($t->id_indikator == $i->id) {
+                                    $tar = $t;
+                                }
+                            }
+
+                            $buk = '';
+                            $idB = '';
+                            $pelaksanaanEditor = '';
+                            foreach ($bukti as $b) {
+                                if ($b->id_indikator == $i->id) {
+                                    $buk = $b->komentar;
+                                    $idB = $b->id;
+                                    $pelaksanaanEditor = $b->edited_by;
+                                }
+                            }
+
+                            $newIndicator = [
+                                'idBuktiPelaksanaan' => $idB,
+                                'idPelaksanaan' => $shiit->id,
+                                'idIndikator' => $i->id,
+                                'indicator' => $i->note,
+                                'target' => $tar->value,
+                                'komentarPelaksanaan' => $buk,
+                                'editorPelaksanaan' => $pelaksanaanEditor,
+                                'isUpdate' => false,
+                            ];
+                            array_push($data['indicators'], $newIndicator);
+                        }
+                    }
+
+                    array_push($respond, $data);
+                }
+            }
+        }
+
+        return response()->json($respond);
+    }
+
+    public function submitPelaksanaan(Request $request)
+    {
+        try {
+            $item = $request->input('data');
+
+            $idIndikator = $item['idIndikator'];
+            $bukti = $item['komentarPelaksanaan'];
+            $idPelaksanaan = $item['idPelaksanaan'];
+            $userName = $item['userName'];
+
+            $buktiPelaksanaan = BuktiPelaksanaan::where('id_indikator', $idIndikator)->first();
+
+            if ($bukti !== null) {
+                if ($buktiPelaksanaan) {
+                    $buktiPelaksanaan->komentar = $bukti;
+                    $buktiPelaksanaan->edited_by = $userName;
+                    $buktiPelaksanaan->save();
+                } else {
+                    BuktiPelaksanaan::create([
+                        'id_pelaksanaan' => $idPelaksanaan,
+                        'id_indikator' => $idIndikator,
+                        'komentar' => $bukti,
+                        'edited_by' => $userName,
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data berhasil disimpan'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat menyimpan data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
     public function getLink($idBukti, $tipeLink) {
         $data = link::where('id_bukti', $idBukti)->where('tipe_link', $tipeLink)->get();
 
@@ -90,52 +206,6 @@ class PelaksanaanController extends Controller {
 
         return response()->json("deleted");
     }
-
-//    public function postLink(Request $request) {
-//        // Log::info('posting link');
-//        $link_bukti = $request->json()->all()['data'];
-//
-//        // Ensure $data is always an array for consistent processing
-//        $link_bukti = is_array($link_bukti) && isset($data[0]['idBukti']) ? $link_bukti : [$link_bukti];
-//
-//        // loop to check if id bukti pelaksanaan valid
-//        $linkValid = [];
-//        foreach ($link_bukti as $link) {
-//            // Check if each link contains the necessary fields
-//            if (!isset($link['idBukti']) || !isset($link['judul_link']) || !isset($link['link'])) {
-//                // Log::info('Invalid data format', $link);
-//                if (!isset($link['idBukti']) || !isset($link['judul_link']) || !isset($link['link']) || !isset($link['tipeLink'])) {
-//                    Log::info('Invalid data format', $link);
-//                    return $this->sendError('Data harus memiliki idBukti, judul_link, dan link yang valid', $link);
-//                }
-//
-//                // query to check id is match with $id_pelaksanaan return boolean
-//                $id_bukti_pelaksanaan = $link['idBukti'];
-//                $isExist = BuktiPelaksanaan::where('id', $id_bukti_pelaksanaan)->exists();
-//                // Log::info($isExist);
-//                if (!$isExist) {
-//                    // Log::warning($link);
-//                    return $this->sendError('Id bukti pelaksanaan tidak valid', $link);
-//                }
-//                $linkValid[] = $link;
-//            }
-//
-//            // Create valid links
-//            foreach ($linkValid as $link) {
-//                // Log::info('Creating link: ', $link);
-//                Link::create([
-//                    'judul_link' => $link['judul_link'],
-//                    'link' => $link['link'],
-//                    'tipe_link' => $link['tipeLink'],
-//                    'id_bukti' => $link['idBukti'],
-//                ]);
-//            }
-//            return $this->sendRespons($link, 'create link success');
-//        }
-//
-//
-//    }
-
     public function postLink(Request $request){
         $data = $request->all();
 

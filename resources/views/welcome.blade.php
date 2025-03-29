@@ -24,6 +24,7 @@
             overflow-x: hidden;
         }
 
+
         button{
             border-style: none;
             width: 3rem;
