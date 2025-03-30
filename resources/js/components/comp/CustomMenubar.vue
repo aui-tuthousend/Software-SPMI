@@ -24,13 +24,18 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Avatar, Menubar } from "primevue";
+import CryptoJS from "crypto-js";
+import {getUserName} from "../stores/commonStore.js";
+import axios from "axios";
 
 const router = useRouter();
-const user = localStorage.getItem("name");
+const user = getUserName();
+
+
 const loading = ref(false);
 const menu = ref(null);
 

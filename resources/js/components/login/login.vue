@@ -132,6 +132,7 @@ import Toast from "primevue/toast";
 import Button from "primevue/button";
 import Message from "primevue/message";
 import ProgressSpinner from "primevue/progressspinner";
+import CryptoJS from "crypto-js";
 
 const router = useRouter();
 const loading = ref(false);
@@ -163,16 +164,20 @@ const login = async (e) => {
         loading.value = true;
         try {
             await axios.get('/sanctum/csrf-cookie');
-
             const response = await axios.post("/api/login", {
                 email: e.values.email,
                 password: e.values.password,
             });
-
             loading.value = false;
 
-            localStorage.setItem("name", response.data.name);
-            localStorage.setItem("userRole", response.data.userRole);
+            const userName = response.data.name
+            const role = response.data.userRole
+
+            const encryptedRole = CryptoJS.AES.encrypt(role, "XD").toString();
+            const encryptedName = CryptoJS.AES.encrypt(userName, "XD").toString();
+
+            localStorage.setItem("name", encryptedName);
+            localStorage.setItem("userRole", encryptedRole);
             localStorage.setItem(
                 "toastMessage",
                 "Login Berhasil. Selamat Datang"
