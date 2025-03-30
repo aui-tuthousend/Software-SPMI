@@ -33,4 +33,8 @@ const route = useRoute();
         --p-datatable-header-cell-text-align: center;
         padding: 5px;
     }
+
+    .custom-textarea {
+        --p-textarea-disabled-background: rgb(255,255,255);
+    }
 </style>

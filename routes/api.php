@@ -19,9 +19,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
     Route::post('/penetapan/import',[PenetapanController::class,'import']);
     Route::get('/downloadSheet', [SheetController::class, 'downloadExcel']);
+
     Route::get('/getPenetapan/{jurusan}/{periode}/{tipePendidikan}/{tipe}', [SheetController::class, 'getPenetapan']);
     Route::get('/getPelaksanaan/{jurusan}/{periode}/{tipePendidikan}/{tipe}', [PelaksanaanController::class, 'getPelaksanaan']);
     Route::get('/getEvaluasi/{jurusan}/{periode}/{tipePendidikan}/{tipe}', [EvaluasiController::class, 'getEvaluasi']);
+    Route::get('/getPengendalian/{jurusan}/{periode}/{tipePendidikan}/{tipe}', [PengendalianController::class, 'getPengendalian']);
+
     Route::get('/getPeriode/{jurusan}', [SheetController::class, 'getPeriode']);
     Route::get('/getAllSheet', [SheetController::class, 'getAllSheet']);
     Route::post('/submitPelaksanaan', [PelaksanaanController::class, 'submitPelaksanaan']);
