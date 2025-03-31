@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import {defineAsyncComponent,ref, toRefs, watch} from "vue";
-// import ModalLink from "@/components/modal/ModalLink.vue";
+import ModalLink from "../modal/ModalLink.vue";
 import {useToast} from "primevue";
-import {fetchPengendalian, submitPengendalian, usePengendalian} from "../stores/usePengendalian";
+import {fetchPengendalian, submitPengendalian, usePengendalian} from "../../stores/usePengendalian";
 const Modal = defineAsyncComponent({
-    loader: () => import('../sheets/modal.vue'),
+    loader: () => import('./modal.vue'),
 });
 const props = defineProps<{
     jurusan: string,
@@ -22,15 +22,18 @@ const popupTriggers = ref<boolean>(false);
 const selectedIndicator = ref<string>('');
 const tipeLink = ref<string>('');
 const komentar = ref<string>('');
+const oldVal = ref<string[]>(['', '', '', '']);
+const count = ref<number[]>([0,0,0,0]);
 
 const sheetTypes = ['input', 'proses', 'output'];
 const current = ref<string>(sheetTypes[0]);
 
 watch([current, tipeSheet], async ()=> {
-  loading.value = true;
-  await fetchPengendalian(props.jurusan, props.periode, props.tipeSheet, current.value);
-  loading.value = false;
-  // console.log(usePengendalian.list)
+    loading.value = true;
+    await fetchPengendalian(props.jurusan, props.periode, props.tipeSheet, current.value);
+    loading.value = false;
+    count.value = [0,0,0,0];
+    oldVal.value = ['', '', '', ''];
 }, {immediate: true})
 
 const handleSubmitPengendalian = async (data) => {
@@ -52,6 +55,26 @@ const handleSubmitPengendalian = async (data) => {
             toast.add({ severity: 'success', summary: 'Success Saving', detail: 'Evaluasi Saved', life: 3000 });
         }
     }
+};
+
+const handleFocus = (old: string, index: number) => {
+    count.value[index] += 1;
+    if (count.value[index] == 1){
+        oldVal.value[index] = old;
+    }
+}
+
+
+const isChanged = (data: any) => {
+    data.isUpdate = true;
+    isEditing.value = true;
+    watch(
+        () => data.temuan,
+        (newValue, oldValue) => {
+            console.log(`Indicator changed from "${oldValue}" to "${newValue}"`);
+        },
+        { immediate: false }
+    );
 };
 
 const openPopup = (indicator, tipe, komen) => {
@@ -102,8 +125,7 @@ const togglePopup = () => {
               <Column header="Penetapan" :colspan="3" />
               <Column header="Pelaksanaan" :rowspan="2" />
               <Column header="Evaluasi" :rowspan="2" />
-              <Column header="Pengendalian" :colspan="4" />
-              <Column header="Link RTL" :rowspan="2" />
+              <Column header="Pengendalian" :colspan="5" />
               <Column header="Save" :rowspan="2" />
             </Row>
             <Row>
@@ -114,25 +136,26 @@ const togglePopup = () => {
               <Column header="Akar Masalah"/>
               <Column header="RTL"/>
               <Column header="Pelaksanaan RTL"/>
+              <Column header="Link RTL"/>
             </Row>
           </ColumnGroup>
           <Column field="standar" header="Standar" class="min-w-[10rem] max-w-[10rem] h-[5rem]">
             <template #body="{ data }">
               <span v-if="loading">
-                  <Skeleton width="8rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <span
                   class="w-[10rem]"
                   v-else
               >
-                  {{ data.standar }}
+                  {{ data?.standar! }}
               </span>
             </template>
           </Column>
           <Column field="indicators" class="w-[20rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="20rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <span
                   v-else
@@ -152,7 +175,7 @@ const togglePopup = () => {
           <Column field="indicators" class="w-[3rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="3rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <div
                   v-else
@@ -167,7 +190,7 @@ const togglePopup = () => {
           <Column field="indicators" class="w-[5rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="5rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <div
                   v-else
@@ -189,7 +212,7 @@ const togglePopup = () => {
           <Column field="indicators" class="w-[3rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="3rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <div
                   v-else
@@ -198,8 +221,8 @@ const togglePopup = () => {
                   class="h-[10rem] w-[100%] flex items-center justify-center"
               >
                 <Button
-                    v-if="indicator.evaluasi"
-                    @click="openPopup(indicator.idBuktiEvaluasiuasi, 'Evaluasi', indicator.evaluasi)"
+                    v-if="indicator.idBuktiEvaluasi"
+                    @click="openPopup(indicator.idBuktiEvaluasi, 'Evaluasi', indicator.evaluasi)"
                     severity="contrast"
                     variant="outlined"
                     raised
@@ -210,7 +233,7 @@ const togglePopup = () => {
           <Column field="indicators" class="w-[20rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="20rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <div
                   v-else
@@ -223,7 +246,8 @@ const togglePopup = () => {
                       v-tooltip.top="{ value: 'Input Temuan', showDelay: 500, hideDelay: 300 }"
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiEvaluasi"
                       v-model="indicator.temuan"
-                      @input="indicator.isUpdate = true; isEditing = true"
+
+                      @focus="isChanged(indicator)"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -237,7 +261,7 @@ const togglePopup = () => {
           <Column field="indicators" class="w-[20rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="20rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <div
                   v-else
@@ -250,7 +274,8 @@ const togglePopup = () => {
                       v-tooltip.top="{ value: 'Input Akar Masalah', showDelay: 500, hideDelay: 300 }"
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiEvaluasi"
                       v-model="indicator.akarMasalah"
-                      @input="indicator.isUpdate = true; isEditing = true"
+                      @input="isChanged(indicator)"
+                      @focus="handleFocus(indicator.akarMasalah, 1)"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -264,7 +289,7 @@ const togglePopup = () => {
           <Column field="indicators" class="w-[20rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="20rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <div
                   v-else
@@ -277,7 +302,8 @@ const togglePopup = () => {
                       v-tooltip.top="{ value: 'Input RTL', showDelay: 500, hideDelay: 300 }"
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiEvaluasi"
                       v-model="indicator.rtl"
-                      @input="indicator.isUpdate = true; isEditing = true"
+                      @input="isChanged(indicator)"
+                      @focus="handleFocus(indicator.rtl, 2)"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -291,7 +317,7 @@ const togglePopup = () => {
           <Column field="indicators" class="w-[20rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="20rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <div
                   v-else
@@ -301,10 +327,11 @@ const togglePopup = () => {
               >
                 <FloatLabel variant="on" >
                   <Textarea
-                      v-tooltip.top="{ value: 'Input RTL', showDelay: 500, hideDelay: 300 }"
+                      v-tooltip.top="{ value: 'Input Pelaksanaan RTL', showDelay: 500, hideDelay: 300 }"
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiEvaluasi"
                       v-model="indicator.pelaksanaanRtl"
-                      @input="indicator.isUpdate = true; isEditing = true"
+                      @input="isChanged(indicator)"
+                      @focus="handleFocus(indicator.pelaksanaanRtl, 3)"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -319,7 +346,7 @@ const togglePopup = () => {
           <Column field="indicators" class="w-[3rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="3rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <div
                   v-else
@@ -327,145 +354,47 @@ const togglePopup = () => {
                   :key="index"
                   class="h-[10rem] w-[3rem] flex items-center justify-center"
               >
-                <Button
-                    v-if="indicator.idBuktiEvaluasi"
-                    severity="contrast"
-                    variant="outlined"
-                    raised
-                    class="pop"
-                >
-                  Link
-                </Button>
+                  <ModalLink
+                      v-if="indicator.idBPengendalian"
+                      :idBukti = indicator.idBPengendalian
+                      :tipe="'Pengendalian'"
+                      :role="role"
+                  />
               </div>
             </template>
           </Column>
 
-          <Column field="indicators" class="w-[3rem]">
+          <Column field="indicators" class="w-[5rem]">
             <template #body="slotProps">
               <span v-if="loading">
-                  <Skeleton width="3rem" height="16px" />
+                  <Skeleton width="100%" height="16px" />
               </span>
               <div
                   v-else
                   v-for="(indicator, index) in slotProps.data.indicators"
                   :key="index"
-                  class="h-[10rem] w-[3rem] flex items-center justify-center"
+                  class="h-[10rem] w-[5rem] flex items-center justify-center"
               >
-                <Button
-                    v-if="indicator.isUpdate"
-                    @click="handleSubmitPengendalian(indicator)"
-                    icon="pi pi-check" iconPos="right"
-                    style="width: 4rem; height: 2rem;"
-                    severity="info"
-                >save</Button>
-                <Button
-                    v-else
-                    disabled
-                    icon="pi pi-check" iconPos="right"
-                    style="width: 4rem; height: 2rem;"
-                >save</Button>
+                  <ButtonGroup >
+                      <Button
+                          icon="pi pi-check"
+                          severity="info"
+                          :disabled="!indicator.isUpdate"
+                          raised
+                          @click="handleSubmitPengendalian(indicator)"
+                      />
+                      <Button
+                          icon="pi pi-times"
+                          severity="danger"
+                          raised
+                          :disabled="!indicator.isUpdate"
+                      />
+                  </ButtonGroup>
               </div>
             </template>
           </Column>
         </DataTable>
 
-<!--        <table class="tb">-->
-<!--        <thead>-->
-<!--        <tr>-->
-<!--            <th colspan="3"><h4 class="font-poppin">Penetapan</h4></th>-->
-<!--            <th rowspan="2"><h4 class="font-poppin">Pelaksanaan</h4></th>-->
-<!--            <th rowspan="2"><h4 class="font-poppin">Evaluasi</h4></th>-->
-<!--            <th colspan="4"><h4 class="font-poppin">Pengendalian</h4></th>-->
-<!--            <th rowspan="2" class="link">Link Bukti Pelaksanaan RTL</th>-->
-<!--            <th rowspan="2" class="link">save</th>-->
-<!--        </tr>-->
-<!--        <tr>-->
-<!--            <th><div class="th">Standar</div></th>-->
-<!--            <th><div class="th">Indicator</div></th>-->
-<!--            <th>Target</th>-->
-<!--            <th>Temuan</th>-->
-<!--            <th>Akar Masalah</th>-->
-<!--            <th>RTL</th>-->
-<!--            <th>Pelaksanaan RTL</th>-->
-<!--        </tr>-->
-<!--        </thead>-->
-<!--        <tbody>-->
-<!--        <template v-for="(standar, index) in props.data" :key="index">-->
-<!--            <tr>-->
-<!--                <td :rowspan="standar.indicators.length + 1">{{ standar.standar }}</td>-->
-<!--            </tr>-->
-<!--            <tr v-for="data in standar.indicators" :key="data.id">-->
-<!--                <td>{{ data.indicator }}</td>-->
-<!--                <td>{{ data.target }}</td>-->
-<!--&lt;!&ndash;             Pelaksanaan            &ndash;&gt;-->
-<!--                <td>-->
-<!--                    <button-->
-<!--                    v-if="data.idBukti !== ''"-->
-<!--                    @click="openPopup(data.idBukti, 'Pelaksanaan', data.bukti)"-->
-<!--                    :title="data.bukti">-->
-<!--                        Link-->
-<!--                    </button>-->
-<!--                </td>-->
-<!--&lt;!&ndash;             Evaluasi            &ndash;&gt;-->
-<!--                <td>-->
-<!--                    <button-->
-<!--                    v-if="data.evaluasi !== ''"-->
-<!--                    @click="openPopup(data.idBuktiEvaluasi, 'Evaluasi', data.evaluasi)"-->
-<!--                    :title="data.evaluasi">-->
-<!--                        Link-->
-<!--                    </button>-->
-<!--                </td>-->
-<!--                    <td>-->
-<!--                        <div class="edited">-->
-<!--                            <p>Last edited by: {{data.editorPengendali}}</p>-->
-<!--                            <textarea-->
-<!--                                :disabled="data.idBuktiEvaluasi === ''"-->
-<!--                                class="ta"-->
-<!--                                v-model="data.temuan"-->
-<!--                                @input="data.isUpdate = true"-->
-<!--                            ></textarea>-->
-<!--                        </div>-->
-<!--                    </td>-->
-<!--                    <td>-->
-<!--                        <textarea-->
-<!--                            :disabled="data.idBuktiEvaluasi === ''"-->
-<!--                            class="ta"-->
-<!--                            v-model="data.akar_masalah"-->
-<!--                            @input="data.isUpdate = true"-->
-<!--                        ></textarea>-->
-<!--                    </td>-->
-<!--                    <td>-->
-<!--                        <textarea-->
-<!--                            :disabled="data.idBuktiEvaluasi === ''"-->
-<!--                            class="ta"-->
-<!--                            v-model="data.rtl"-->
-<!--                            @input="data.isUpdate = true"-->
-<!--                        ></textarea>-->
-<!--                    </td>-->
-<!--                    <td>-->
-<!--                        <textarea-->
-<!--                            :disabled="data.idBuktiEvaluasi === ''"-->
-<!--                            class="ta"-->
-<!--                            v-model="data.pelaksanaan_rtl"-->
-<!--                            @input="data.isUpdate = true"-->
-<!--                        ></textarea>-->
-<!--                    </td>-->
-<!--                    <td>-->
-<!--&lt;!&ndash;                        use teleport !!&ndash;&gt;-->
-<!--                        <ModalLink-->
-<!--                            :idBukti = data.idBPengendalian-->
-<!--                            :tipe="'Pengendalian'"-->
-<!--                            :role="role"-->
-<!--                        />-->
-<!--                    </td>-->
-<!--                    <td>-->
-<!--                        <button v-if="data.isUpdate" class="btnn" @click="savePengendalian(data.idBuktiEvaluasi, data.temuan, data.akar_masalah, data.rtl, data.pelaksanaan_rtl)">save</button>-->
-<!--                        <button v-else >save</button>-->
-<!--                    </td>-->
-<!--            </tr>-->
-<!--        </template>-->
-<!--        </tbody>-->
-<!--    </table>-->
     </div>
     <Modal
         v-if="popupTriggers"

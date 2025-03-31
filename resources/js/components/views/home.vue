@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import Homepage from "@/components/homepage/homepage.vue";
+import Homepage from "../components/homepage/homepage.vue";
 import Toast from "primevue/toast";
-import Import from "../upload/import.vue";
+import Import from "./import.vue";
 import { useToast } from "primevue";
 
 const toast = useToast();

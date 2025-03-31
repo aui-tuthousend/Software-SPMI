@@ -12,7 +12,7 @@ import Aura from "@primeuix/themes/aura";
 import {
     AutoComplete,
     Avatar,
-    Button, Card,
+    Button, ButtonGroup, Card,
     Column,
     ColumnGroup,
     DataTable,
@@ -56,6 +56,7 @@ appVue.component("Toast", Toast);
 appVue.component("Avatar", Avatar);
 appVue.component("Menubar", Menubar);
 appVue.component("Button", Button);
+appVue.component("ButtonGroup", ButtonGroup);
 appVue.component("Image", Image);
 appVue.component("Card", Card);
 appVue.component("ScrollPanel", ScrollPanel);

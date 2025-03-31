@@ -138,61 +138,45 @@ class PengendalianController extends Controller
     public function submitPengendalian(Request $request)
     {
         try {
-            $item = $request->input('data');
+            $validatedData = $request->validate([
+                'data.idBuktiEvaluasi'   => 'required|exists:bukti_evaluasis,id',
+                'data.temuan'            => 'required|string',
+                'data.akarMasalah'       => 'required|string',
+                'data.rtl'               => 'required|string',
+                'data.pelaksanaanRtl'    => 'required|string',
+                'data.userName'          => 'required|string',
+            ]);
 
-            if (!isset($item['idBuktiEvaluasi'], $item['temuan'], $item['akarMasalah'], $item['rtl'], $item['pelaksanaanRtl'], $item['userName'])) {
-                return response()->json([
-                    'message' => 'Data tidak lengkap',
-                    'error' => 'Beberapa parameter hilang'
-                ], 400);
-            }
+            $idBuktiEvaluasi = $validatedData['data']['idBuktiEvaluasi'];
+            $temuan          = $validatedData['data']['temuan'];
+            $akarMasalah     = $validatedData['data']['akarMasalah'];
+            $rtl             = $validatedData['data']['rtl'];
+            $pelaksanaanRtl  = $validatedData['data']['pelaksanaanRtl'];
+            $userName        = $validatedData['data']['userName'];
 
-            $idBuktiEvaluasi = $item['idBuktiEvaluasi'];
-            $temuan = $item['temuan'];
-            $akarMasalah = $item['akarMasalah'];
-            $rtl = $item['rtl'];
-            $pelaksanaanRtl = $item['pelaksanaanRtl'];
-            $userName = $item['userName'];
-
-            if (!BuktiEvaluasi::where('id', $idBuktiEvaluasi)->exists()) {
-                return response()->json([
-                    'message' => 'Id bukti evaluasi tidak valid'
-                ], 400);
-            }
-
-            $pengendalian = BuktiPengendalian::where('id_bukti_evaluasi', $idBuktiEvaluasi)->first();
-
-            if ($pengendalian) {
-                $pengendalian->update([
-                    'temuan' => $temuan,
-                    'akar_masalah' => $akarMasalah,
-                    'rtl' => $rtl,
-                    'pelaksanaan_rtl' => $pelaksanaanRtl,
-                    'edited_by' => $userName,
-                ]);
-            } else {
-                BuktiPengendalian::create([
-                    'temuan' => $temuan,
-                    'akar_masalah' => $akarMasalah,
-                    'rtl' => $rtl,
-                    'pelaksanaan_rtl' => $pelaksanaanRtl,
-                    'id_bukti_evaluasi' => $idBuktiEvaluasi,
-                    'edited_by' => $userName,
-                ]);
-            }
+            $pengendalian = BuktiPengendalian::updateOrCreate(
+                ['id_bukti_evaluasi' => $idBuktiEvaluasi],
+                [
+                    'temuan'           => $temuan,
+                    'akar_masalah'     => $akarMasalah,
+                    'rtl'              => $rtl,
+                    'pelaksanaan_rtl'  => $pelaksanaanRtl,
+                    'edited_by'        => $userName,
+                ]
+            );
 
             return response()->json([
-                'message' => 'Pengendalian berhasil diproses'
+                'message' => 'Pengendalian berhasil diproses',
+                'data'    => $pengendalian
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan saat memproses data',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage()
             ], 500);
         }
     }
-
 
     public function destroy($id)
     {
