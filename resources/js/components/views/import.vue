@@ -1,7 +1,7 @@
 <script setup>
-import XlsxRead from "./XlsxRead.vue";
-import XlsxTable from "./XlsxTable.vue";
-import XlsxSheets from "./XlsxSheets.vue";
+import XlsxRead from "../components/upload/XlsxRead.vue";
+import XlsxTable from "../components/upload/XlsxTable.vue";
+import XlsxSheets from "../components/upload/XlsxSheets.vue";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import axios from "axios";

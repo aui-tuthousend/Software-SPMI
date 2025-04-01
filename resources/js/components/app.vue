@@ -38,3 +38,9 @@ const route = useRoute();
         --p-textarea-disabled-background: rgb(255,255,255);
     }
 </style>
+
+<style lang="scss">
+
+@import 'primeicons/primeicons.css';
+
+</style>

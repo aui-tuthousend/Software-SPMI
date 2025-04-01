@@ -111,53 +111,53 @@ class EvaluasiController extends Controller {
     public function submitEval(Request $request)
     {
         try {
-            $item = $request->input('data');
+            $validatedData = $request->validate([
+                'data.idBuktiPelaksanaan' => 'required|exists:bukti_pelaksanaans,id',
+                'data.idEvaluasi'         => 'required',
+                'data.komentarEvaluasi'   => 'required|string',
+                'data.adjusment'          => 'required|string',
+                'data.userName'           => 'required|string',
+                'data.idIndikator'        => 'required|exists:indikators,id',
+                'data.indicator'          => 'nullable|string',
+            ]);
 
-            $idBP = $item['idBuktiPelaksanaan'];
-            $idEvaluasi = $item['idEvaluasi'];
-            $komentarEvaluasi = $item['komentarEvaluasi'];
-            $adjusment = $item['adjusment'];
-            $userName = $item['userName'];
-            $idInd = $item['idIndikator'];
-            $indica = $item['indicator'];
+            $idBP             = $validatedData['data']['idBuktiPelaksanaan'];
+            $idEvaluasi       = $validatedData['data']['idEvaluasi'];
+            $komentarEvaluasi = $validatedData['data']['komentarEvaluasi'];
+            $adjusment        = $validatedData['data']['adjusment'];
+            $userName         = $validatedData['data']['userName'];
+            $idInd            = $validatedData['data']['idIndikator'];
+            $indica           = $validatedData['data']['indicator'];
 
-            $isEval = BuktiEvaluasi::where('id_bukti_pelaksanaan', $idBP)->first();
-
-            if ($isEval) {
-                $isEval->komentar = $komentarEvaluasi;
-                $isEval->adjustment = $adjusment;
-                $isEval->edited_by  = $userName;
-                $isEval->save();
-            } else {
-                BuktiEvaluasi::create([
-                    'id_bukti_pelaksanaan' => $idBP,
-                    'id_evaluasi' => $idEvaluasi,
-                    'komentar' => $komentarEvaluasi,
-                    'adjustment' => $adjusment,
-                    'edited_by' => $userName,
-                ]);
-            }
+            $buktiEvaluasi = BuktiEvaluasi::updateOrCreate(
+                ['id_bukti_pelaksanaan' => $idBP],
+                [
+                    'id_evaluasi'  => $idEvaluasi,
+                    'komentar'     => $komentarEvaluasi,
+                    'adjustment'   => $adjusment,
+                    'edited_by'    => $userName,
+                ]
+            );
 
             $indicator = Indikator::find($idInd);
-            if ($indicator && $indicator->note != $indica) {
-                $indicator->note = $indica;
-                $indicator->save();
+            if ($indicator && $indicator->note !== $indica) {
+                $indicator->update(['note' => $indica]);
             }
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Data berhasil disimpan'
+                'status'  => 'success',
+                'message' => 'Data berhasil disimpan',
+                'data'    => $buktiEvaluasi
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Terjadi kesalahan saat menyimpan data',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage()
             ], 500);
         }
     }
-
 
     public function delComment(Request $request) {
         $idBukti = $request->input('idBukti');

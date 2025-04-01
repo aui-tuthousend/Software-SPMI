@@ -98,7 +98,12 @@ onClickOutside(modal, () => (isModal.value = false));
 </script>
 
 <template>
-    <button @click="isModal = true">Link</button>
+    <Button
+        @click="isModal = true"
+        severity="contrast"
+        variant="outlined"
+        raised
+    >Link</Button>
 
     <Teleport to="#modal">
         <Transition name="modal">

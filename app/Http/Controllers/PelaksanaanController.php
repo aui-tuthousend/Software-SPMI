@@ -148,45 +148,40 @@ class PelaksanaanController extends Controller {
     public function submitPelaksanaan(Request $request)
     {
         try {
-            $item = $request->input('data');
+            $validatedData = $request->validate([
+                'data.idIndikator'         => 'required|exists:indikators,id',
+                'data.komentarPelaksanaan' => 'nullable|string',
+                'data.idPelaksanaan'       => 'required',
+                'data.userName'            => 'required|string',
+            ]);
 
-            $idIndikator = $item['idIndikator'];
-            $bukti = $item['komentarPelaksanaan'];
-            $idPelaksanaan = $item['idPelaksanaan'];
-            $userName = $item['userName'];
+            $idIndikator   = $validatedData['data']['idIndikator'];
+            $bukti         = $validatedData['data']['komentarPelaksanaan'];
+            $idPelaksanaan = $validatedData['data']['idPelaksanaan'];
+            $userName      = $validatedData['data']['userName'];
 
-            $buktiPelaksanaan = BuktiPelaksanaan::where('id_indikator', $idIndikator)->first();
-
-            if ($bukti !== null) {
-                if ($buktiPelaksanaan) {
-                    $buktiPelaksanaan->komentar = $bukti;
-                    $buktiPelaksanaan->edited_by = $userName;
-                    $buktiPelaksanaan->save();
-                } else {
-                    BuktiPelaksanaan::create([
-                        'id_pelaksanaan' => $idPelaksanaan,
-                        'id_indikator' => $idIndikator,
-                        'komentar' => $bukti,
-                        'edited_by' => $userName,
-                    ]);
-                }
-            }
+            $buktiPelaksanaan = BuktiPelaksanaan::updateOrCreate(
+                ['id_indikator' => $idIndikator],
+                [
+                    'id_pelaksanaan' => $idPelaksanaan,
+                    'komentar'       => $bukti,
+                    'edited_by'      => $userName,
+                ]
+            );
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Data berhasil disimpan'
+                'status'  => 'success',
+                'message' => 'Data berhasil disimpan',
+                'data'    => $buktiPelaksanaan,
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Terjadi kesalahan saat menyimpan data',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage()
             ], 500);
         }
     }
-
-
 
     public function getLink($idBukti, $tipeLink) {
         $data = link::where('id_bukti', $idBukti)->where('tipe_link', $tipeLink)->get();

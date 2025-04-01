@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import {useRoute} from "vue-router";
-import Pelaksanaan from "../sheets/pelaksanaan.vue";
-import Pengendalian from "../sheets/pengendalian.vue";
-import Evaluasi from "../sheets/evaluasi.vue";
+import Pelaksanaan from "../components/sheets/pelaksanaan.vue";
+import Pengendalian from "../components/sheets/pengendalian.vue";
+import Evaluasi from "../components/sheets/evaluasi.vue";
+import Peningkatan from "../components/sheets/peningkatan.vue";
 import {getUserName, getUserRole} from "../stores/commonStore.js";
 
 
@@ -51,11 +52,14 @@ const jurusan = ref<string>(route.params.jurusan.toString());
                     :role="role"
                     :username="name"
                 />
-                <peningkatan
+                <Peningkatan
                     v-else-if="role=== 'Peningkatan'"
                     :jurusan="jurusan"
                     :periode="periode"
                     :tipeSheet="currentSheet"
+                    :role="role"
+                    :username="name"
+                    @isUpdate=""
                 />
 
             </div>
@@ -66,10 +70,6 @@ const jurusan = ref<string>(route.params.jurusan.toString());
 <style scoped>
 
 
-button {
-    width: 5rem;
-    height: 1rem;
-}
 
 
 

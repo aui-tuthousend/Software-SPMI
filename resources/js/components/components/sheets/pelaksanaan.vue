@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {defineAsyncComponent, ref, toRefs, watch} from "vue";
-import {usePelaksanaan, submitPelaksanaan, fetchPelaksanaan} from '../stores/usePelaksanaan.js'
+import {usePelaksanaan, submitPelaksanaan, fetchPelaksanaan} from '../../stores/usePelaksanaan.js'
 import {useToast} from "primevue";
 const Modal = defineAsyncComponent({
-    loader: () => import('../sheets/modal.vue'),
+    loader: () => import('./modal.vue'),
 });
 
 const props = defineProps<{
@@ -127,13 +127,13 @@ const openPopup = (indicator, tipe) => {
             <Column field="standar" header="Standar" class="min-w-[10rem] max-w-[10rem] h-[5rem]">
                 <template #body="{ data }">
                     <span v-if="loading">
-                        <Skeleton width="10rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <span
                         class="w-[10rem]"
                         v-else
                     >
-                        {{ data.standar }}
+                        {{ data?.standar! }}
                     </span>
                 </template>
             </Column>
@@ -160,7 +160,7 @@ const openPopup = (indicator, tipe) => {
             <Column field="indicators" class="w-[2rem]">
                 <template #body="slotProps">
                     <span v-if="loading">
-                        <Skeleton width="2rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <div
                         v-else
@@ -175,7 +175,7 @@ const openPopup = (indicator, tipe) => {
             <Column field="indicators" class="w-[25rem]">
                 <template #body="slotProps">
                     <span v-if="loading">
-                        <Skeleton width="25rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <div
                         v-else
@@ -203,7 +203,7 @@ const openPopup = (indicator, tipe) => {
             <Column field="indicators" class="w-[3rem]">
                 <template #body="slotProps">
                     <span v-if="loading">
-                        <Skeleton width="3rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <div
                         v-else
@@ -223,10 +223,10 @@ const openPopup = (indicator, tipe) => {
                 </template>
             </Column>
 
-            <Column field="indicators" class="w-[2rem]">
+            <Column field="indicators" class="w-[5rem]">
                 <template #body="slotProps">
                     <span v-if="loading">
-                        <Skeleton width="3rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <div
                         v-else
@@ -234,20 +234,21 @@ const openPopup = (indicator, tipe) => {
                         :key="index"
                         class="h-[10rem] w-[100%] flex items-center justify-center"
                     >
-
-                        <Button
-                            v-if="indicator.isUpdate"
-                            @click="handleSumbitPelaksanaan(indicator)"
-                            icon="pi pi-check" iconPos="right"
-                            style="width: 4rem; height: 2rem;"
-                            severity="info"
-                        >save</Button>
-                        <Button
-                            v-else
-                            disabled
-                            icon="pi pi-check" iconPos="right"
-                            style="width: 4rem; height: 2rem;"
-                        >save</Button>
+                        <ButtonGroup >
+                            <Button
+                                icon="pi pi-check"
+                                severity="info"
+                                :disabled="!indicator.isUpdate"
+                                raised
+                                @click="handleSumbitPelaksanaan(indicator)"
+                            />
+                            <Button
+                                icon="pi pi-times"
+                                severity="danger"
+                                raised
+                                :disabled="!indicator.isUpdate"
+                            />
+                        </ButtonGroup>
                     </div>
                 </template>
             </Column>
