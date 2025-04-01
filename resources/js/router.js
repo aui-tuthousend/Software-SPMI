@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import axios from "axios";
 import Home from "./components/views/home.vue";
 import Sheet from "./components/views/sheet.vue";
-// import SuperUser from "./components/views/superUser.vue";
+import SuperUser from "./components/views/superUser.vue";
 import Importexcel from "./components/views/import.vue";
 import Register from "./components/views/register.vue";
 import Login from "./components/views/login.vue";
@@ -56,23 +56,23 @@ const router = createRouter({
                 }
             },
         },
-        // {
-        //     path: "/superUser/:jurusan/:periode",
-        //     name: "SuperUser",
-        //     component: SuperUser,
-        //     beforeEnter: async (to, from, next) => {
-        //         const user = await isAuthenticated();
-        //         if (user) {
-        //             if (user.role === "Evaluasi") {
-        //                 next();
-        //             } else {
-        //                 next("/");
-        //             }
-        //         } else {
-        //             next("/login");
-        //         }
-        //     },
-        // },
+        {
+            path: "/superUser/:jurusan/:periode",
+            name: "SuperUser",
+            component: SuperUser,
+            beforeEnter: async (to, from, next) => {
+                const user = await isAuthenticated();
+                if (user) {
+                    if (user.role === "Evaluasi") {
+                        next();
+                    } else {
+                        next("/");
+                    }
+                } else {
+                    next("/login");
+                }
+            },
+        },
         {
             path: "/import",
             component: Importexcel,

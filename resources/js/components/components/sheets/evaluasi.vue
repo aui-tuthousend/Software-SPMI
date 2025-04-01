@@ -2,8 +2,10 @@
 import {defineAsyncComponent, toRefs, ref, watch} from "vue";
 import {useToast} from "primevue";
 import {useEvaluasi, submitEvaluasi, fetchEvaluasi} from '../../stores/useEvaluasi'
-const Modal = defineAsyncComponent({
-    loader: () => import('./modal.vue'),
+import {useConfirm} from "primevue/useconfirm";
+import ConfirmPopup from 'primevue/confirmpopup';
+const ModalLink = defineAsyncComponent({
+    loader: () => import('./modal/modalLink.vue'),
 });
 const props = defineProps<{
     jurusan: string,
@@ -15,14 +17,12 @@ const props = defineProps<{
 const { jurusan, periode, tipeSheet, role, username } = toRefs(props);
 
 const toast = useToast();
+const confirm = useConfirm();
 const loading = ref<boolean>(false);
 const isEditing = ref<boolean>(false);
-const popupTriggers = ref<boolean>(false);
-const selectedIndicator = ref<string>('');
-const tipeLink = ref<string>('');
 const adjusmentOptions = ref<string[]>(['melampaui', 'mencapai', 'belum mencapai', 'menyimpang']);
-const oldVal = ref<string>('');
-const count = ref<number>(0);
+const oldVal = ref<string[]>(['','','']);
+const count = ref<number[]>([0,0,0]);
 
 const sheetTypes = ['input', 'proses', 'output'];
 const current = ref<string>(sheetTypes[0]);
@@ -31,9 +31,10 @@ watch([current, tipeSheet], async ()=> {
     loading.value = true;
     await fetchEvaluasi(props.jurusan, props.periode, props.tipeSheet, current.value);
     loading.value = false;
-    count.value = 0;
-    oldVal.value = '';
+    oldVal.value = ['','',''];
+    count.value = [0,0,0];
 }, {immediate: true})
+
 
 const handleSubmitEvaluasi = async (data) => {
     if (!data.adjusment){
@@ -56,37 +57,61 @@ const handleSubmitEvaluasi = async (data) => {
     }
 };
 
-const handleFocus = (old: string) => {
-    count.value += 1;
-    if (count.value == 1){
-        oldVal.value = old;
+const handleReset = (event, data: any) => {
+    confirm.require({
+        target: event.currentTarget,
+        group: 'headless',
+        message: 'Discard your current changes?',
+        accept: () => {
+            oldVal.value[0] && (data.indicator = oldVal.value[0]);
+            oldVal.value[1] && (data.komentarEvaluasi = oldVal.value[1]);
+            oldVal.value[2] && (data.adjusment = oldVal.value[2]);
+            data.isUpdate = false;
+            isEditing.value = false;
+            oldVal.value = ['','',''];
+            count.value = [0,0,0];
+            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Changes discarded', life: 3000 });
+        },
+        reject: () => {
+            // toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+        }
+    });
+};
+
+const handleBlur = () => {
+    if (!isEditing.value) {
+        oldVal.value = ['','',''];
+        count.value = [0,0,0];
+    }
+}
+const handleFocus = (old: string, index: number) => {
+    count.value[index] += 1;
+    if (count.value[index] == 1){
+        oldVal.value[index] = old;
     }
 }
 
 const isChanged = (data: any) => {
     data.isUpdate = true;
     isEditing.value = true;
-    if (data.komentarEvaluasi === oldVal.value){
-        isEditing.value = false;
-        data.isUpdate = false;
-        count.value = 0;
-    }
 }
 
-const togglePopup = () => {
-    popupTriggers.value = !popupTriggers.value;
-};
-
-const openPopup = (indicator, tipe) => {
-    selectedIndicator.value = indicator;
-    tipeLink.value = tipe;
-    togglePopup();
-};
 </script>
 
 <template>
     <div class="w-full h-full">
         <Toast />
+        <ConfirmPopup group="headless">
+            <template #container="{ message, acceptCallback, rejectCallback }">
+                <div class="rounded p-4">
+                    <span>{{ message?.message! }}</span>
+                    <div class="flex items-center gap-2 mt-4">
+                        <Button label="Yes" severity="danger" @click="acceptCallback" size="small"></Button>
+                        <Button label="Cancel" outlined @click="rejectCallback" severity="secondary" size="small" text></Button>
+                    </div>
+                </div>
+            </template>
+        </ConfirmPopup>
         <div class="w-full card flex justify-center">
             <Stepper value="Input" class="p-stepper">
                 <StepList>
@@ -158,7 +183,11 @@ const openPopup = (indicator, tipe) => {
                         class="h-[10rem] w-[20rem] flex items-center justify-center"
                     >
                         <Textarea
+                            :disabled="isEditing && !indicator.isUpdate"
                             v-model="indicator.indicator"
+                            @focus="handleFocus(indicator.indicator, 0)"
+                            @input="isChanged(indicator)"
+                            @blur="handleBlur"
                             style="resize: none; height: 9rem; width: 100%;"
                         />
                     </span>
@@ -216,14 +245,12 @@ const openPopup = (indicator, tipe) => {
                         :key="index"
                         class="h-[10rem] w-[3rem] flex items-center justify-center"
                     >
-                        <Button
+                        <ModalLink
                             v-if="indicator.idBuktiPelaksanaan"
-                            @click="openPopup(indicator.idBuktiPelaksanaan, 'Pelaksanaan')"
-                            severity="contrast"
-                            variant="outlined"
-                            raised
-                            class="pop"
-                        >Link</Button>
+                            :idBukti = indicator.idBuktiPelaksanaan
+                            :tipeLink="'Pelaksanaan'"
+                            :role="role"
+                        />
                     </div>
                 </template>
             </Column>
@@ -245,7 +272,8 @@ const openPopup = (indicator, tipe) => {
                                 :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiPelaksanaan"
                                 v-model="indicator.komentarEvaluasi"
                                 @input="isChanged(indicator)"
-                                @focus="handleFocus(indicator.komentarEvaluasi)"
+                                @focus="handleFocus(indicator.komentarEvaluasi, 1)"
+                                @blur="handleBlur"
 
                                 style="resize: none; height: 9rem; width: 20rem"
                             />
@@ -272,9 +300,11 @@ const openPopup = (indicator, tipe) => {
                         <Select
                             style="width: 10rem"
                             :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiPelaksanaan"
-                            @change="indicator.isUpdate = true; isEditing = true"
-                            v-model="indicator.adjusment"
                             :options="adjusmentOptions"
+                            v-model="indicator.adjusment"
+                            @change="isChanged(indicator)"
+                            @focus="handleFocus(indicator.adjusment, 2)"
+                            @blur="handleBlur"
                             checkmark :highlightOnSelect="false"
                         />
                     </div>
@@ -291,16 +321,12 @@ const openPopup = (indicator, tipe) => {
                         :key="index"
                         class="h-[10rem] w-[3rem] flex items-center justify-center"
                     >
-                        <Button
-                            v-if="indicator.idBuktiEval !== ''"
-                            @click="openPopup(indicator.idBuktiEval, 'Evaluasi')"
-                            severity="contrast"
-                            variant="outlined"
-                            raised
-                            class="pop"
-                        >
-                            Link
-                        </Button>
+                        <ModalLink
+                            v-if="indicator.idBuktiEval"
+                            :idBukti = indicator.idBuktiEval
+                            :tipeLink="'Evaluasi'"
+                            :role="role"
+                        />
                     </div>
                 </template>
             </Column>
@@ -329,6 +355,7 @@ const openPopup = (indicator, tipe) => {
                                 severity="danger"
                                 raised
                                 :disabled="!indicator.isUpdate"
+                                @click="handleReset($event ,indicator)"
                             />
                         </ButtonGroup>
                     </div>
@@ -336,13 +363,6 @@ const openPopup = (indicator, tipe) => {
             </Column>
         </DataTable>
 
-        <Modal
-            v-if="popupTriggers"
-            :togglePopup="togglePopup"
-            :idBukti="selectedIndicator"
-            :tipe="tipeLink"
-            :role="role"
-        />
   </div>
 </template>
 

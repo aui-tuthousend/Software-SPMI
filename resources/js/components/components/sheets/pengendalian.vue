@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import {defineAsyncComponent,ref, toRefs, watch} from "vue";
-import ModalLink from "../modal/ModalLink.vue";
 import {useToast} from "primevue";
 import {fetchPengendalian, submitPengendalian, usePengendalian} from "../../stores/usePengendalian";
-const Modal = defineAsyncComponent({
-    loader: () => import('./modal.vue'),
+import {useConfirm} from "primevue/useconfirm";
+import ConfirmPopup from "primevue/confirmpopup";
+
+const ModalLink = defineAsyncComponent({
+    loader: () => import('./modal/modalLink.vue'),
+});
+const ModalShow = defineAsyncComponent({
+    loader: () => import('./modal/modalShow.vue'),
 });
 const props = defineProps<{
     jurusan: string,
@@ -16,12 +21,9 @@ const props = defineProps<{
 const { jurusan, periode, tipeSheet, role, username } = toRefs(props);
 
 const toast = useToast();
+const confirm = useConfirm();
 const loading = ref<boolean>(false);
 const isEditing = ref<boolean>(false);
-const popupTriggers = ref<boolean>(false);
-const selectedIndicator = ref<string>('');
-const tipeLink = ref<string>('');
-const komentar = ref<string>('');
 const oldVal = ref<string[]>(['', '', '', '']);
 const count = ref<number[]>([0,0,0,0]);
 
@@ -57,6 +59,34 @@ const handleSubmitPengendalian = async (data) => {
     }
 };
 
+const handleReset = (event, data: any) => {
+    confirm.require({
+        target: event.currentTarget,
+        group: 'headless',
+        message: 'Discard your current changes?',
+        accept: () => {
+            oldVal.value[0] && (data.temuan = oldVal.value[0]);
+            oldVal.value[1] && (data.akarMasalah = oldVal.value[1]);
+            oldVal.value[2] && (data.rtl = oldVal.value[2]);
+            oldVal.value[3] && (data.pelaksanaanRtl = oldVal.value[3]);
+            data.isUpdate = false;
+            isEditing.value = false;
+            count.value = [0,0,0,0];
+            oldVal.value = ['', '', '', ''];
+            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Changes discarded', life: 3000 });
+        },
+        reject: () => {
+            // toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+        }
+    });
+};
+
+const handleBlur = () => {
+    if (!isEditing.value) {
+        count.value = [0,0,0,0];
+        oldVal.value = ['', '', '', ''];
+    }
+}
 const handleFocus = (old: string, index: number) => {
     count.value[index] += 1;
     if (count.value[index] == 1){
@@ -64,33 +94,27 @@ const handleFocus = (old: string, index: number) => {
     }
 }
 
-
 const isChanged = (data: any) => {
     data.isUpdate = true;
     isEditing.value = true;
-    watch(
-        () => data.temuan,
-        (newValue, oldValue) => {
-            console.log(`Indicator changed from "${oldValue}" to "${newValue}"`);
-        },
-        { immediate: false }
-    );
 };
 
-const openPopup = (indicator, tipe, komen) => {
-  selectedIndicator.value = indicator;
-  tipeLink.value = tipe;
-  komentar.value = komen;
-  togglePopup();
-};
-const togglePopup = () => {
-  popupTriggers.value = !popupTriggers.value;
-};
 </script>
 
 <template>
     <div class="w-full h-full">
         <Toast />
+        <ConfirmPopup group="headless">
+            <template #container="{ message, acceptCallback, rejectCallback }">
+                <div class="rounded p-4">
+                    <span>{{ message?.message! }}</span>
+                    <div class="flex items-center gap-2 mt-4">
+                        <Button label="Yes" severity="danger" @click="acceptCallback" size="small"></Button>
+                        <Button label="Cancel" outlined @click="rejectCallback" severity="secondary" size="small" text></Button>
+                    </div>
+                </div>
+            </template>
+        </ConfirmPopup>
         <div class="w-full card flex justify-center">
             <Stepper value="Input" class="p-stepper">
               <StepList>
@@ -136,7 +160,7 @@ const togglePopup = () => {
               <Column header="Akar Masalah"/>
               <Column header="RTL"/>
               <Column header="Pelaksanaan RTL"/>
-              <Column header="Link RTL"/>
+              <Column header="Link"/>
             </Row>
           </ColumnGroup>
           <Column field="standar" header="Standar" class="min-w-[10rem] max-w-[10rem] h-[5rem]">
@@ -198,14 +222,12 @@ const togglePopup = () => {
                   :key="index"
                   class="h-[10rem] w-[100%] flex items-center justify-start"
               >
-                <Button
-                    v-if="indicator.idBukti"
-                    @click="openPopup(indicator.idBukti, 'Pelaksanaan', indicator.bukti)"
-                    severity="contrast"
-                    variant="outlined"
-                    raised
-                    class="min-w-[100%]"
-                >show</Button>
+                  <ModalShow
+                      v-if="indicator.idBukti"
+                      :idBukti = indicator.idBukti
+                      :tipeLink="'Pelaksanaan'"
+                      :comment="indicator.bukti"
+                  />
               </div>
             </template>
           </Column>
@@ -220,13 +242,12 @@ const togglePopup = () => {
                   :key="index"
                   class="h-[10rem] w-[100%] flex items-center justify-center"
               >
-                <Button
-                    v-if="indicator.idBuktiEvaluasi"
-                    @click="openPopup(indicator.idBuktiEvaluasi, 'Evaluasi', indicator.evaluasi)"
-                    severity="contrast"
-                    variant="outlined"
-                    raised
-                >show</Button>
+                  <ModalShow
+                      v-if="indicator.idBuktiEvaluasi"
+                      :idBukti = indicator.idBuktiEvaluasi
+                      :tipeLink="'Evaluasi'"
+                      :comment="indicator.evaluasi"
+                  />
               </div>
             </template>
           </Column>
@@ -246,8 +267,9 @@ const togglePopup = () => {
                       v-tooltip.top="{ value: 'Input Temuan', showDelay: 500, hideDelay: 300 }"
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiEvaluasi"
                       v-model="indicator.temuan"
-
-                      @focus="isChanged(indicator)"
+                      @input="isChanged(indicator)"
+                      @focus="handleFocus(indicator.temuan, 0)"
+                      @blur="handleBlur"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -276,6 +298,7 @@ const togglePopup = () => {
                       v-model="indicator.akarMasalah"
                       @input="isChanged(indicator)"
                       @focus="handleFocus(indicator.akarMasalah, 1)"
+                      @blur="handleBlur"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -304,6 +327,7 @@ const togglePopup = () => {
                       v-model="indicator.rtl"
                       @input="isChanged(indicator)"
                       @focus="handleFocus(indicator.rtl, 2)"
+                      @blur="handleBlur"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -332,6 +356,7 @@ const togglePopup = () => {
                       v-model="indicator.pelaksanaanRtl"
                       @input="isChanged(indicator)"
                       @focus="handleFocus(indicator.pelaksanaanRtl, 3)"
+                      @blur="handleBlur"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -357,7 +382,7 @@ const togglePopup = () => {
                   <ModalLink
                       v-if="indicator.idBPengendalian"
                       :idBukti = indicator.idBPengendalian
-                      :tipe="'Pengendalian'"
+                      :tipeLink="'Pengendalian'"
                       :role="role"
                   />
               </div>
@@ -388,22 +413,14 @@ const togglePopup = () => {
                           severity="danger"
                           raised
                           :disabled="!indicator.isUpdate"
+                          @click="handleReset($event ,indicator)"
                       />
                   </ButtonGroup>
               </div>
             </template>
           </Column>
         </DataTable>
-
     </div>
-    <Modal
-        v-if="popupTriggers"
-        :togglePopup="togglePopup"
-        :idBukti="selectedIndicator"
-        :tipe="tipeLink"
-        :role=" 'Pengendalian' "
-        :komentar="komentar"
-    />
 </template>
 
 <style scoped>
