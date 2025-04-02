@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 
-export function useUserActions(setShowEditModal, setSelectedUser, showResetModal) {
+export function useUserActions(setShowEditModal, setSelectedUser, showResetModal, setShowHistoryModal) {
   const menuItems = ref([
     {
       label: 'View History',
@@ -28,7 +28,8 @@ export function useUserActions(setShowEditModal, setSelectedUser, showResetModal
   ]);
 
   const viewHistory = (user) => {
-    alert(`This feature not ready yet`);
+    setSelectedUser(user);
+    setShowHistoryModal(true);
   };
 
   const editRole = (user) => {
@@ -60,4 +61,4 @@ export function useUserActions(setShowEditModal, setSelectedUser, showResetModal
     editRole,
     deleteUser,
   };
-} 
+}

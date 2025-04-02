@@ -190,9 +190,7 @@ class PelaksanaanController extends Controller {
     }
 
     public function deleteLink(Request $request) {
-        $idLink = $request->input('idLink');
-        $id = $idLink['idL'];
-
+        $id = $request->input('idLink');
         $link = link::find($id);
 
         if ($link) {
@@ -201,25 +199,58 @@ class PelaksanaanController extends Controller {
 
         return response()->json("deleted");
     }
-    public function postLink(Request $request){
-        $data = $request->all();
+    public function postLink(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'data.id' => 'nullable|string',
+                'data.idBukti' => 'required|string',
+                'data.judul_link' => 'required|string',
+                'data.link' => 'required|url',
+                'data.tipeLink' => 'required|string',
+            ]);
 
-        $idBukti = $data['idBukti'];
-        $judul_link = $data['judul_link'];
-        $link = $data['link'];
-        $tipeLink = $data['tipeLink'];
+            $id = $validatedData['data']['id'] ?? null;
+            $idBukti = $validatedData['data']['idBukti'];
+            $judulLink = $validatedData['data']['judul_link'];
+            $link = $validatedData['data']['link'];
+            $tipeLink = $validatedData['data']['tipeLink'];
 
-        link::create([
-            'id_bukti' => $idBukti,
-            'judul_link' => $judul_link,
-            'link' => $link,
-            'tipe_link' => $tipeLink,
-        ]);
+            if ($id) {
+                $linkData = Link::find($id);
+                if ($linkData) {
+                    $linkData->update([
+//                        'id_bukti' => $idBukti,
+//                        'tipe_link' => $tipeLink,
+                        'link' => $link,
+                        'judul_link' => $judulLink,
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Data tidak ditemukan untuk diperbarui'
+                    ], 404);
+                }
+            } else {
+                Link::create([
+                    'id_bukti' => $idBukti,
+                    'tipe_link' => $tipeLink,
+                    'link' => $link,
+                    'judul_link' => $judulLink,
+                ]);
+            }
 
-            // Proses data lebih lanjut di sini
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Link berhasil disimpan'
+            ], 200);
 
-        return response()->json(['success' => 'Link submitted successfully']);
-
-//        return response()->json("null");
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat menyimpan link',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

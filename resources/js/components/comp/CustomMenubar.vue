@@ -29,7 +29,7 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Avatar, Menubar } from "primevue";
 import CryptoJS from "crypto-js";
-import { getUserName, getUserRole } from "../stores/commonStore.js";
+import {getUserName, getUserRole} from "../stores/commonStore.js";
 import axios from "axios";
 
 const router = useRouter();
@@ -46,7 +46,7 @@ const toggleMenu = (e) => {
 
 const profileMenu = computed(() => [
     {
-        label: user,
+        label: `${user} (${role})`,
         icon: "pi pi-user",
         disabled: true,
     },

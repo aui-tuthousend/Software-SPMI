@@ -46,13 +46,10 @@ export async function submitPelaksanaan() {
 export async function fetchPelaksanaan(jurusan: string, periode: string, currentSheet: string, current: string) {
     try {
         const response = await fetch(`/api/getPelaksanaan/${jurusan}/${periode}/${currentSheet}/${current}`);
-
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
         usePelaksanaan.list = await response.json();
-
     } catch (error) {
         console.error('Error fetching data:', error.message);
     }
