@@ -19,7 +19,7 @@ import {
     Dialog,
     FloatLabel,
     IconField,
-    Image,
+    Image, InputGroup, InputGroupAddon,
     InputIcon,
     InputText,
     Menu,
@@ -61,6 +61,8 @@ appVue.component("Image", Image);
 appVue.component("Card", Card);
 appVue.component("ScrollPanel", ScrollPanel);
 appVue.component("Panel", Panel);
+appVue.component("InputGroup", InputGroup);
+appVue.component("InputGroupAddon", InputGroupAddon);
 appVue.component("InputText", InputText);
 appVue.component("InputIcon", InputIcon);
 appVue.component("IconField", IconField);

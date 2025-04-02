@@ -127,7 +127,7 @@ class PeningkatanController extends Controller
                                 'temuan' => $temuan,
                                 'akar_masalah' => $akar_masalah,
                                 'rtl' => $rtl,
-                                'pelaksanaan_rtl' => $pelaksanaan_rtl,
+                                'pelaksanaanRtl' => $pelaksanaan_rtl,
                                 'editorPengendali' => $pengendalianEditor,
                                 'idPeningkatan' => $idPeningkatan,
                                 'komenPeningkatan' => $komenPeningkatan,

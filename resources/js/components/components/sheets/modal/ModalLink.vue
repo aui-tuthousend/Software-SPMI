@@ -33,6 +33,7 @@ const payload = ref<LinkPayload>(
 watch(escape, (v) => {
     if (v) {
         isModal.value = false;
+        handleInitial()
     }
 })
 watch(isModal, async ()=> {
@@ -97,9 +98,10 @@ const openLink = (link) => {
     window.open(link, "_blank")
 }
 
-onClickOutside(modal, () => (
-    isModal.value = false
-));
+onClickOutside(modal, () => {
+    isModal.value = false;
+    handleInitial();
+});
 
 </script>
 
