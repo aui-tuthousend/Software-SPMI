@@ -30,7 +30,7 @@ export default {
 
             html = html.replace(
                 "<table>",
-                '<table class="table  table-hover table-striped text-center" style="width:100%;">'
+                '<table class="border border-collapse text-center" style="width:100%;">'
             );
 
             const parser = new DOMParser();
@@ -39,8 +39,17 @@ export default {
             allCells.forEach((row) => {
                 const cells = row.querySelectorAll("td, th");
                 cells.forEach((cell) => {
-                    if (cell.textContent.trim() === "") {
+                    const cellText = cell.textContent.trim();
+                    
+                    if (cellText === "") {
                         cell.remove();
+                        return;
+                    }
+                    
+                    cell.classList.add("border", "border-gray-300", "p-2");
+                    
+                    if (["INPUT", "PROSES", "OUTPUT"].includes(cellText)) {
+                        cell.classList.add("bg-gray-100", "font-semibold");
                     }
                 });
             });
