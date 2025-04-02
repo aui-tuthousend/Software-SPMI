@@ -220,7 +220,7 @@ const downloadFile = async () => {
                 </div>
                 <div class="form-group">
                     <label for="note"
-                        >Catatan <span class="required">*</span></label
+                        >Catatan</label
                     >
                     <textarea
                         id="note"

@@ -38,8 +38,12 @@ onMounted(async () => {
         loading.value = true;
         // await new Promise(resolve => setTimeout(resolve, 10000)); // Simulate a delay of 10 seconds
         const response = await fetch("/api/getAllSheet");
-        const data = await response.json();
-        availableSheets.value = data; // Update available sheets with fetched data
+        if (response.status === 200) {
+            const data = await response.json();
+            availableSheets.value = data; // Update available sheets with fetched data
+        } else {
+            console.error("Error fetching sheet data:", response.statusText);
+        }
     } catch (error) {
         console.error("Error fetching sheet data:", error);
     } finally {

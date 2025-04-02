@@ -29,11 +29,12 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Avatar, Menubar } from "primevue";
 import CryptoJS from "crypto-js";
-import {getUserName} from "../stores/commonStore.js";
+import { getUserName, getUserRole } from "../stores/commonStore.js";
 import axios from "axios";
 
 const router = useRouter();
 const user = getUserName();
+const role = getUserRole();
 
 
 const loading = ref(false);
@@ -89,7 +90,7 @@ const items = computed(() => {
         },
     ];
 
-    if (localStorage.getItem("userRole") === "Evaluasi") {
+    if (role === "Evaluasi") {
         baseItems.splice(1, 0, {
             label: "Upload",
             icon: "pi pi-cloud-upload",
@@ -97,7 +98,7 @@ const items = computed(() => {
         });
     }
 
-    if (localStorage.getItem("userRole") === "Admin") {
+    if (role === "Admin") {
         baseItems.splice(0, 1, {
             label: "User Management",
             icon: "pi pi-user-edit",
