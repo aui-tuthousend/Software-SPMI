@@ -1,6 +1,7 @@
 <?php
 
 //use Illuminate\Routing\Controller;
+use App\Http\Controllers\ApiLogController;
 use App\Http\Controllers\EvaluasiController;
 use App\Http\Controllers\PelaksanaanController;
 use App\Http\Controllers\PeningkatanController;
@@ -53,3 +54,5 @@ Route::get('/admin/listuser', [AccountController::class, 'listUser']);
 Route::post('/admin/registerUser', [AccountController::class, 'register']);
 Route::post('/admin/edit/role', [AccountController::class, 'editUserRole']);
 Route::post('/admin/reset-password', [AccountController::class, 'resetPassword']);
+Route::get('api-logs', [ApiLogController::class, 'index']);
+Route::get('api-logs-user', [ApiLogController::class, 'getUserHistory']);
