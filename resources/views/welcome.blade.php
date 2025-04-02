@@ -14,8 +14,8 @@
 </head>
 
 <body>
-<div id="app" class="w-screen bg-gray-100 ">
-</div>
+<div id="app" class="w-screen bg-gray-100 "></div>
+<div id="modal" class="w-screen bg-gray-100 "></div>
 
 
     <style>
@@ -31,6 +31,7 @@
             height: 2rem;
         }
     </style>
+
 </body>
 
 </html>

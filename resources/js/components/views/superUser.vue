@@ -7,6 +7,7 @@ import Pengendalian from "@/components/sheets/pengendalian.vue";
 import data from "bootstrap/js/src/dom/data.js";
 import Evaluasi from "@/components/sheets/evaluasi.vue";
 import Peningkatan from "@/components/sheets/peningkatan.vue";
+import ModalLink from "@/components/components/modal/ModalLink.vue";
 
 
 const standarData = ref([]);
@@ -166,3 +167,84 @@ button {
 }
 
 </style>
+
+<table class="tb">
+<thead>
+<tr>
+    <th colspan="3"><h4 class="font-poppin">Penetapan</h4></th>
+    <th rowspan="2"><h4 class="font-poppin">Pelaksanaan</h4></th>
+    <th rowspan="2"><h4 class="font-poppin">Evaluasi</h4></th>
+    <th rowspan="2"><h4 class="font-poppin">Pengendalian</h4></th>
+    <th><h4 class="font-poppin" style="width: 27rem;">Peningkatan</h4></th>
+    <th rowspan="2" class="link">Link Peningkatan</th>
+    <th rowspan="2" class="link">save</th>
+</tr>
+<tr>
+    <th><div class="th">Standar</div></th>
+    <th><div class="th">Indicator</div></th>
+    <th>Target</th>
+    <th>Komentar</th>
+</tr>
+</thead>
+<tbody>
+<template v-for="(standar, index) in props.data" :key="index">
+    <tr>
+        <td :rowspan="standar.indicators.length + 1">{{ standar.standar }}</td>
+    </tr>
+    <tr v-for="data in standar.indicators" :key="data.id">
+        <td>{{ data.indicator }}</td>
+        <td>{{ data.target }}</td>
+        <!--             Pelaksanaan            -->
+        <td>
+            <button
+                v-if="data.idBukti !== ''"
+                @click="openPopup(data.idBukti, 'Pelaksanaan', data.bukti)"
+                :title="data.bukti">
+                Link
+            </button>
+        </td>
+        <!--             Evaluasi            -->
+        <td>
+            <button
+                v-if="data.evaluasi !== ''"
+                @click="openPopup(data.idBuktiEval, 'Evaluasi', data.evaluasi)"
+                :title="data.evaluasi">
+                Link
+            </button>
+        </td>
+        <td>
+            <button
+                v-if="data.idBPengendalian !== ''"
+                @click="openPopup2(data.idBPengendalian, data.temuan, data.akar_masalah, data.rtl, data.pelaksanaan_rtl)"
+                :title="data.temuan">
+                Link
+            </button>
+        </td>
+        <td>
+            <div class="edited">
+                <p>Last edited by: {{data.editorPeningkatan}}</p>
+                <textarea
+                    :disabled="data.idBPengendalian === ''"
+                    class="ta"
+                    v-model="data.komenPeningkatan"
+                    @input="data.isUpdate=true"
+                ></textarea>
+            </div>
+        </td>
+        <td>
+            <ModalLink
+                :idBukti = data.idPeningkatan
+                :tipe="'Peningkatan'"
+                :role="role"
+            />
+        </td>
+        <td>
+            <button v-if="data.isUpdate" class="btnn" @click="savePeningkatan(data.idBPengendalian, data.komenPeningkatan)">save</button>
+            <button v-else >save</button>
+            <p v-if="saving">Saving...</p>
+        </td>
+    </tr>
+</template>
+</tbody>
+</table>
+

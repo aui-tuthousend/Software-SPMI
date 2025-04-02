@@ -33,4 +33,14 @@ const route = useRoute();
         --p-datatable-header-cell-text-align: center;
         padding: 5px;
     }
+
+    .custom-textarea {
+        --p-textarea-disabled-background: rgb(255,255,255);
+    }
+</style>
+
+<style lang="scss">
+
+@import 'primeicons/primeicons.css';
+
 </style>

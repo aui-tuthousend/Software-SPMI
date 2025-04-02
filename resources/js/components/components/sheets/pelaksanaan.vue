@@ -1,40 +1,45 @@
 <script setup lang="ts">
 import {defineAsyncComponent, ref, toRefs, watch} from "vue";
-import {usePelaksanaan, submitPelaksanaan, fetchPelaksanaan} from '../stores/usePelaksanaan.js'
+import {usePelaksanaan, submitPelaksanaan, fetchPelaksanaan} from '../../stores/usePelaksanaan.js'
 import {useToast} from "primevue";
 const Modal = defineAsyncComponent({
-    loader: () => import('../sheets/modal.vue'),
+    loader: () => import('./modal.vue'),
 });
 
 const props = defineProps<{
     jurusan: string,
     periode: string,
     tipeSheet: string,
+    role: string,
+    username: string,
 }>();
-const { jurusan, periode, tipeSheet } = toRefs(props);
-const role = localStorage.getItem("userRole");
-const username = localStorage.getItem('name');
+
+const { jurusan, periode, tipeSheet, role, username } = toRefs(props);
 const toast = useToast();
 
-const loading = ref(false);
-const isEditing = ref(false);
-const popupTriggers = ref(false);
-const selectedIndicator = ref(null);
-const tipeLink = ref(null);
+const loading = ref<boolean>(false);
+const isEditing = ref<boolean>(false);
+const popupTriggers = ref<boolean>(false);
+const selectedIndicator = ref<string>('');
+const tipeLink = ref<string>('');
+const oldVal = ref<string>('');
+const count = ref<number>(0);
 
 const sheetTypes = ['input', 'proses', 'output'];
-const current = ref(sheetTypes[0]);
+const current = ref<string>(sheetTypes[0]);
 
 watch([current, tipeSheet], async ()=> {
     loading.value = true;
     await fetchPelaksanaan(props.jurusan, props.periode, props.tipeSheet, current.value);
     loading.value = false;
+    count.value = 0;
+    oldVal.value = '';
 }, {immediate: true})
 
 const handleSumbitPelaksanaan = async (data) => {
     data.isUpdate = false;
     usePelaksanaan.initial(data)
-    usePelaksanaan.setUserName(username)
+    usePelaksanaan.setUserName(username.value)
     const response = await submitPelaksanaan()
 
     if (response === 200){
@@ -45,7 +50,22 @@ const handleSumbitPelaksanaan = async (data) => {
 
 };
 
+const handleFocus = (old: string) => {
+    count.value += 1;
+    if (count.value == 1){
+        oldVal.value = old;
+    }
+}
 
+const isChanged = (data: any) => {
+    data.isUpdate = true;
+    isEditing.value = true;
+    if (data.komentarPelaksanaan === oldVal.value){
+        isEditing.value = false;
+        data.isUpdate = false;
+        count.value = 0;
+    }
+}
 
 const togglePopup = () => {
     popupTriggers.value = !popupTriggers.value;
@@ -97,23 +117,23 @@ const openPopup = (indicator, tipe) => {
                     <Column header="Save" :rowspan="2" />
                 </Row>
                 <Row>
-                    <Column header="Standar" style="width: 10px"/>
+                    <Column header="Standar"/>
                     <Column header="Indikator"/>
                     <Column header="Target"/>
                     <Column header="Komentar"/>
                     <Column header="Link"/>
                 </Row>
             </ColumnGroup>
-            <Column field="standar" header="Standar" class="w-[10rem] h-[5rem]">
+            <Column field="standar" header="Standar" class="min-w-[10rem] max-w-[10rem] h-[5rem]">
                 <template #body="{ data }">
                     <span v-if="loading">
-                        <Skeleton width="8rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <span
                         class="w-[10rem]"
                         v-else
                     >
-                        {{ data.standar }}
+                        {{ data?.standar! }}
                     </span>
                 </template>
             </Column>
@@ -130,6 +150,7 @@ const openPopup = (indicator, tipe) => {
                     >
                         <Textarea
                             disabled
+                            class="custom-textarea"
                             v-model="indicator.indicator"
                             style="resize: none; height: 9rem"
                         />
@@ -139,7 +160,7 @@ const openPopup = (indicator, tipe) => {
             <Column field="indicators" class="w-[2rem]">
                 <template #body="slotProps">
                     <span v-if="loading">
-                        <Skeleton width="2rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <div
                         v-else
@@ -154,7 +175,7 @@ const openPopup = (indicator, tipe) => {
             <Column field="indicators" class="w-[25rem]">
                 <template #body="slotProps">
                     <span v-if="loading">
-                        <Skeleton width="25rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <div
                         v-else
@@ -167,7 +188,8 @@ const openPopup = (indicator, tipe) => {
                                 v-tooltip.top="{ value: 'Input Pelaksanaan', showDelay: 500, hideDelay: 300 }"
                                 :disabled="isEditing && !indicator.isUpdate"
                                 v-model="indicator.komentarPelaksanaan"
-                                @input="indicator.isUpdate = true; isEditing = true"
+                                @input="isChanged(indicator)"
+                                @focus="handleFocus(indicator.komentarPelaksanaan)"
                                 style="resize: none; height: 9rem; width: 25rem"
                             />
                             <label
@@ -181,7 +203,7 @@ const openPopup = (indicator, tipe) => {
             <Column field="indicators" class="w-[3rem]">
                 <template #body="slotProps">
                     <span v-if="loading">
-                        <Skeleton width="3rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <div
                         v-else
@@ -201,10 +223,10 @@ const openPopup = (indicator, tipe) => {
                 </template>
             </Column>
 
-            <Column field="indicators" class="w-[2rem]">
+            <Column field="indicators" class="w-[5rem]">
                 <template #body="slotProps">
                     <span v-if="loading">
-                        <Skeleton width="3rem" height="16px" />
+                        <Skeleton width="100%" height="16px" />
                     </span>
                     <div
                         v-else
@@ -212,77 +234,25 @@ const openPopup = (indicator, tipe) => {
                         :key="index"
                         class="h-[10rem] w-[100%] flex items-center justify-center"
                     >
-
-                        <Button
-                            v-if="indicator.isUpdate"
-                            @click="handleSumbitPelaksanaan(indicator)"
-                            icon="pi pi-check" iconPos="right"
-                            style="width: 4rem; height: 2rem;"
-                            severity="info"
-                        >save</Button>
-                        <Button
-                            v-else
-                            disabled
-                            icon="pi pi-check" iconPos="right"
-                            style="width: 4rem; height: 2rem;"
-                        >save</Button>
+                        <ButtonGroup >
+                            <Button
+                                icon="pi pi-check"
+                                severity="info"
+                                :disabled="!indicator.isUpdate"
+                                raised
+                                @click="handleSumbitPelaksanaan(indicator)"
+                            />
+                            <Button
+                                icon="pi pi-times"
+                                severity="danger"
+                                raised
+                                :disabled="!indicator.isUpdate"
+                            />
+                        </ButtonGroup>
                     </div>
                 </template>
             </Column>
         </DataTable>
-
-
-<!--        <div class="table">-->
-<!--            <table class="Pelaksanaan">-->
-<!--                <thead>-->
-<!--                <tr>-->
-<!--                    <th colspan="3"><h4 class="font-poppin">Penetapan</h4></th>-->
-<!--                    <th colspan="2"><h4 class="font-poppin">Pelaksanaan</h4></th>-->
-<!--                    <th rowspan="2" class="link">save</th>-->
-<!--                </tr>-->
-<!--                <tr>-->
-<!--                    <th><div class="font-poppin th">Standar</div></th>-->
-<!--                    <th><div class="font-poppin th">Indikator</div></th>-->
-<!--                    <th><div class="font-poppin link">Target</div></th>-->
-<!--                    <th><div class="xd">Komentar</div></th>-->
-<!--                    <th><div class="font-poppin link">Link Bukti</div></th>-->
-<!--                </tr>-->
-<!--                </thead>-->
-<!--                <tbody>-->
-<!--                <template v-for="(standar, index) in props.data" :key="index">-->
-<!--                    <tr>-->
-<!--                        <td :rowspan="standar.indicators.length + 1">{{ standar.standar }}</td>-->
-<!--                    </tr>-->
-<!--                    <tr v-for="data in standar.indicators" :key="data.id">-->
-<!--                        <td>{{ data.indicator }}</td>-->
-<!--                        <td>{{ data.target }}</td>-->
-
-<!--                        <td>-->
-<!--                            <div class="edited">-->
-<!--                                <p>Last edited by: {{data.editorPelaksanaan}}</p>-->
-<!--                                <textarea class="tb"-->
-<!--                                          v-model="data.bukti"-->
-<!--                                          @input="data.isUpdate = true"></textarea>-->
-<!--                            </div>-->
-<!--                        </td>-->
-<!--                        <td>-->
-<!--                            <button-->
-<!--                                v-if="data.idBukti !== ''"-->
-<!--                                class="pop"-->
-<!--                                @click="openPopup(data.idBukti, 'Pelaksanaan')">-->
-<!--                                Link-->
-<!--                            </button>-->
-<!--                        </td>-->
-<!--                        <td>-->
-<!--                            <button v-if="data.isUpdate" class="btnn" @click="save(data.id, data.bukti, data.idPelaksanaan, data.idBukti)">save</button>-->
-<!--                            <button v-else >save</button>-->
-<!--                        </td>-->
-<!--                    </tr>-->
-<!--                </template>-->
-<!--                </tbody>-->
-<!--            </table>-->
-<!--        </div>-->
-
 
         <Modal
             v-if="popupTriggers"
