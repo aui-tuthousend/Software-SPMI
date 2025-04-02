@@ -147,14 +147,15 @@ export function useUserManagement() {
     }
   };
 
-  const fetchUserHistory = async (user) => {
+  const fetchUserHistory = async () => {
     isLoadingHistory.value = true;
     historyError.value = null;
     try {
       const response = await axios.post('/api/api-logs-user', {
-        username: user.name
+        username: selectedUser.value.name
       });
-      userHistory.value = response.data;
+      // console.log(response.data.data)
+      userHistory.value = await response.data.data;
     } catch (error) {
       console.error('Error getting user history:', error);
       historyError.value = error.response?.data?.message || 'Failed to fetch user history';
@@ -168,7 +169,7 @@ export function useUserManagement() {
       isLoadingHistory.value = false;
     }
   };
-  
+
   const viewUserHistory = async (user) => {
     selectedUser.value = user;
     await fetchUserHistory(user);
@@ -202,4 +203,4 @@ export function useUserManagement() {
     viewUserHistory,
     fetchUserHistory
   };
-} 
+}

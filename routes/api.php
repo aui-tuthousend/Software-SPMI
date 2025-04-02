@@ -54,5 +54,5 @@ Route::get('/admin/listuser', [AccountController::class, 'listUser']);
 Route::post('/admin/registerUser', [AccountController::class, 'register']);
 Route::post('/admin/edit/role', [AccountController::class, 'editUserRole']);
 Route::post('/admin/reset-password', [AccountController::class, 'resetPassword']);
-Route::get('api-logs', [ApiLogController::class, 'index']);
-Route::get('api-logs-user', [ApiLogController::class, 'getUserHistory']);
+Route::get('/api-logs', [ApiLogController::class, 'index']);
+Route::post('/api-logs-user', [ApiLogController::class, 'getUserHistory']);

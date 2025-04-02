@@ -1,6 +1,6 @@
 <template>
     <Toast />
-    <main class="admin-page">
+    <main class="max-h-full h-full w-full">
         <div class="card">
             <Toolbar class="mb-4">
                 <template #start>
@@ -159,14 +159,18 @@
 
                     <DataTable :value="userHistory" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 25]"
                         responsiveLayout="scroll">
-                        <Column field="timestamp" header="Timestamp" :sortable="true">
+                        <Column field="created_at" header="Timestamp" :sortable="true">
                             <template #body="{ data }">
-                                {{ formatDateTime(data.timestamp) }}
+                                {{ formatDate(data.created_at) }}
                             </template>
                         </Column>
-                        <Column field="endpoint" header="Endpoint" :sortable="true"></Column>
+                        <Column field="url" header="Endpoint" :sortable="true">
+                            <template #body="{ data }">
+                                {{ extractPath(data.url) }}
+                            </template>
+                        </Column>
                         <Column field="method" header="Method" :sortable="true"></Column>
-                        <Column field="status" header="Status" :sortable="true"></Column>
+                        <Column field="status_code" header="Status" :sortable="true"></Column>
                     </DataTable>
                 </div>
                 <template #footer>
@@ -178,7 +182,7 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, watch } from "vue";
 import { useUserManagement } from "@/composables/useUserManagement";
 import { useUserActions } from "@/composables/useUserActions";
 import { Toast, useToast } from "primevue";
@@ -207,15 +211,21 @@ const {
     userHistory,
     isLoadingHistory,
     historyError,
-    viewUserHistory
+    viewUserHistory,
+    fetchUserHistory,
 } = useUserManagement();
 
 const { menuItems, toggleMenu } = useUserActions(
     (value) => (showEditModal.value = value),
     (value) => (selectedUser.value = value),
     (value) => (showResetModal.value = value),
-    (value) => (showHistoryModal.value = value)
+    (value) => {
+        showHistoryModal.value = value;
+        console.log(showHistoryModal.value);
+        fetchUserHistory();
+    }
 );
+
 
 onMounted(() => {
     const toastMessage = localStorage.getItem("toastMessage");
@@ -235,16 +245,22 @@ onMounted(() => {
 
     fetchUsers();
 });
+
+const formatDate = (timestamp) => {
+    if (!timestamp) return "-";
+    return new Date(timestamp).toISOString().split("T")[0];
+};
+const extractPath = (url) => {
+    try {
+        return new URL(url).pathname;
+    } catch (error) {
+        return url;
+    }
+};
 </script>
 
 <style scoped>
-.admin-page {
-    padding: 20px;
-}
 
-.field {
-    margin-bottom: 1.5rem;
-}
 
 /* Remove other styles as they will be handled by PrimeVue */
 </style>
