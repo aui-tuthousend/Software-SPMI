@@ -31,6 +31,12 @@ export function useUserManagement() {
   const newPassword = ref('');
   const resetSubmitted = ref(false);
 
+  // User history related states
+  const showHistoryModal = ref(false);
+  const userHistory = ref([]);
+  const isLoadingHistory = ref(false);
+  const historyError = ref(null);
+
   const fetchUsers = async () => {
     try {
       const response = await fetch('/api/admin/listuser');
@@ -90,7 +96,7 @@ export function useUserManagement() {
         const response = await axios.post('/api/admin/edit/role', {
           user_id: selectedUser.value.id,
           new_role: selectedUser.value.role
-          });
+        });
         toast.add({
           severity: 'success',
           summary: 'Success',
@@ -120,7 +126,7 @@ export function useUserManagement() {
           user_id: selectedUser.value.id,
           new_password: newPassword.value
         });
-        
+
         toast.add({
           severity: 'success',
           summary: 'Success',
@@ -139,6 +145,34 @@ export function useUserManagement() {
         });
       }
     }
+  };
+
+  const fetchUserHistory = async (user) => {
+    isLoadingHistory.value = true;
+    historyError.value = null;
+    try {
+      const response = await axios.post('/api/api-logs-user', {
+        username: user.name
+      });
+      userHistory.value = response.data;
+    } catch (error) {
+      console.error('Error getting user history:', error);
+      historyError.value = error.response?.data?.message || 'Failed to fetch user history';
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to fetch user history',
+        life: 3000,
+      });
+    } finally {
+      isLoadingHistory.value = false;
+    }
+  };
+  
+  const viewUserHistory = async (user) => {
+    selectedUser.value = user;
+    await fetchUserHistory(user);
+    showHistoryModal.value = true;
   };
 
   return {
@@ -160,5 +194,12 @@ export function useUserManagement() {
     newPassword,
     resetSubmitted,
     resetUserPassword,
+    // User history related returns
+    showHistoryModal,
+    userHistory,
+    isLoadingHistory,
+    historyError,
+    viewUserHistory,
+    fetchUserHistory
   };
 } 
