@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('peningkatans', function (Blueprint $table) {
             $table->id();
             $table->string('komentar');
+            $table->string('edited_by');
             $table->unsignedBigInteger('id_pengendalian');
             $table->timestamps();
         });

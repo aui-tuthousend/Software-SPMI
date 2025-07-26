@@ -94,6 +94,7 @@ class AccountController extends Controller
             'message' => "User {$user->name} successfully logged in"
         ])->withCookie($cookie);
     }
+    
     public function logout(Request $request): JsonResponse
     {
         // Hapus session Laravel

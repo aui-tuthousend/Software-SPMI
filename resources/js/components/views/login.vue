@@ -163,16 +163,22 @@ const login = async (e) => {
     if (e.valid) {
         loading.value = true;
         try {
-            await axios.get('/sanctum/csrf-cookie');
-            const response = await axios.post("/api/login", {
-                email: e.values.email,
-                password: e.values.password,
-            });
+            const response = await axios.post(
+                "/api/login",
+                {
+                    email: e.values.email,
+                    password: e.values.password,
+                },
+                // {
+                //     withCredentials: true,
+                // }
+            );
+
             loading.value = false;
 
-            const userName = response.data.name
-            const role = response.data.userRole
-            const idk = response.data.idk.toString()
+            const userName = response.data.name;
+            const role = response.data.userRole;
+            const idk = response.data.idk.toString();
 
             const encryptedName = CryptoJS.AES.encrypt(userName, `asx${idk}`).toString();
             const encryptedRole = CryptoJS.AES.encrypt(role, `ddx${idk}`).toString();
@@ -180,13 +186,11 @@ const login = async (e) => {
             localStorage.setItem("date", idk);
             localStorage.setItem("name", encryptedName);
             localStorage.setItem("userRole", encryptedRole);
-            localStorage.setItem(
-                "toastMessage",
-                "Login Berhasil. Selamat Datang"
-            );
+            localStorage.setItem("role", role);
+            localStorage.setItem("toastMessage", "Login Berhasil. Selamat Datang");
             localStorage.setItem("toastSeverity", "success");
 
-            await router.push("/");
+            router.push({name: "Home"});
         } catch (error) {
             toast.add({
                 severity: "error",
@@ -197,6 +201,7 @@ const login = async (e) => {
         }
     }
 };
+
 
 const resolver = zodResolver(
     z.object({

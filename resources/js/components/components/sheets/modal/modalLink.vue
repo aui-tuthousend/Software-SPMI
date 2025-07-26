@@ -47,9 +47,11 @@ const handleSubmitLink = async () => {
     payload.value.tipeLink = props.tipeLink
 
     if (
-        !payload.value.link.toLowerCase().startsWith('https://') ||
-        !payload.value.link.toLowerCase().startsWith('http://')
+        payload.value.link.toLowerCase().startsWith('https://') ||
+        payload.value.link.toLowerCase().startsWith('http://')
     ) {
+        payload.value.link = payload.value.link;
+    } else {
         payload.value.link = 'https://' + payload.value.link;
     }
 
@@ -90,8 +92,8 @@ const handleInitial = (data?: any) => {
             tipeLink: data.tipe_link,
         }
     }else {
-        id: '',
         payload.value = {
+            id: '',
             idBukti: '',
             judul_link: '',
             link: '',

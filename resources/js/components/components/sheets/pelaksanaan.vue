@@ -44,7 +44,7 @@ const handleSumbitPelaksanaan = async (data) => {
     if (response === 200){
         await fetchPelaksanaan(props.jurusan, props.periode, props.tipeSheet, current.value);
         isEditing.value = false;
-        toast.add({ severity: 'success', summary: 'Success Saving', detail: 'Evaluasi Saved', life: 3000 });
+        toast.add({ severity: 'success', summary: 'Success Saving', detail: 'Pelaksanaan Saved', life: 3000 });
     }
 
 };

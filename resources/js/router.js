@@ -9,27 +9,18 @@ import Login from "./components/views/login.vue";
 import NotFound from "./components/notFound.vue";
 import HomeAdmin from "./components/views/homeAdmin.vue";
 
-const isAuthenticated = async () => {
-    try {
-        const response = await axios.get("/api/user", {
-            withCredentials: true,
-        });
-        return response.data;
-    } catch (error) {
-        return false;
-    }
-};
+const role = await localStorage.getItem("role")
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
             path: "/",
+            name: "Home",
             component: Home,
             beforeEnter: async (to, from, next) => {
-                const user = await isAuthenticated();
-                if (user) {
-                    if (user.role === "Admin") {
+                if (role) {
+                    if (role === "Admin") {
                         next("/admin/dashboard");
                     } else {
                         next();
@@ -44,9 +35,9 @@ const router = createRouter({
             name: "Sheet",
             component: Sheet,
             beforeEnter: async (to, from, next) => {
-                const user = await isAuthenticated();
-                if (user) {
-                    if (user.role === "Admin") {
+                
+                if (role) {
+                    if (role === "Admin") {
                         next("/admin/dashboard");
                     } else {
                         next();
@@ -61,9 +52,9 @@ const router = createRouter({
             name: "SuperUser",
             component: SuperUser,
             beforeEnter: async (to, from, next) => {
-                const user = await isAuthenticated();
-                if (user) {
-                    if (user.role === "Evaluasi") {
+                
+                if (role) {
+                    if (role === "Evaluasi") {
                         next();
                     } else {
                         next("/");
@@ -77,9 +68,9 @@ const router = createRouter({
             path: "/import",
             component: Importexcel,
             beforeEnter: async (to, from, next) => {
-                const user = await isAuthenticated();
-                if (user) {
-                    if (user.role === "Evaluasi") {
+                
+                if (role) {
+                    if (role === "Evaluasi") {
                         next();
                     } else {
                         next("/");
@@ -93,8 +84,8 @@ const router = createRouter({
             path: "/login",
             component: Login,
             beforeEnter: async (to, from, next) => {
-                const user = await isAuthenticated();
-                if (user) {
+                
+                if (role) {
                     next("/");
                 } else {
                     next();
@@ -108,8 +99,8 @@ const router = createRouter({
             path: "/register",
             component: Register,
             beforeEnter: async (to, from, next) => {
-                const user = await isAuthenticated();
-                if (user) {
+                
+                if (role) {
                     next("/");
                 } else {
                     next();
@@ -130,9 +121,9 @@ const router = createRouter({
             path: "/admin/dashboard",
             component: HomeAdmin,
             beforeEnter: async (to, from, next) => {
-                const user = await isAuthenticated();
-                if (user) {
-                    if (user.role === "Admin") {
+                
+                if (role) {
+                    if (role === "Admin") {
                         next();
                     } else {
                         next("/");

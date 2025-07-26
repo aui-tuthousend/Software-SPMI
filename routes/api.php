@@ -14,7 +14,7 @@ use App\Http\Controllers\PenetapanController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PengendalianController;
 
-Route::group(['middleware' => 'auth:sanctum'], function () {
+Route::group([], function () {
     Route::post('/logout', [AccountController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user();

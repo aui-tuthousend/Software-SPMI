@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bukti_evaluasis', function (Blueprint $table) {
             $table->id();
-            $table->enum('adjustment',['melampai','mencapai','belum mencapai','menyimpan']);
+            $table->enum('adjustment',['melampaui','mencapai','belum mencapai','menyimpang']);
             $table->string('komentar');
             $table->string('edited_by');
             $table->unsignedBigInteger('id_evaluasi');

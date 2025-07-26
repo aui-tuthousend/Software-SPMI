@@ -32,6 +32,7 @@ import CryptoJS from "crypto-js";
 import {getUserName, getUserRole} from "../stores/commonStore.js";
 import axios from "axios";
 
+axios.defaults.withCredentials = true;
 const router = useRouter();
 const user = getUserName();
 const role = getUserRole();
@@ -59,23 +60,24 @@ const profileMenu = computed(() => [
 
 const logout = async () => {
     try {
-        loading.value = true;
-        const response = await axios.post(
-            "/api/logout",
-            {},
-            {
-                withCredentials: true,
-            }
-        );
-        loading.value = false;
+        // loading.value = true;
+        // const response = await axios.post(
+        //     "/api/logout",
+        //     {},
+        //     {
+        //         withCredentials: true,
+        //     }
+        // );
+        // loading.value = false;
 
-        if (response.data.success) {
+        // if (response.data.success) {
             localStorage.removeItem("token");
             localStorage.removeItem("userRole");
+            localStorage.removeItem("role");
             router.push("/login");
-        } else {
-            console.error("Logout failed");
-        }
+        // } else {
+        //     console.error("Logout failed");
+        // }
     } catch (error) {
         console.error("Error during logout:", error);
     }
