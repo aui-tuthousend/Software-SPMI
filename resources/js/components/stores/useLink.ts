@@ -17,7 +17,12 @@ export const useLink = reactive({
 export async function fetchLink(idBukti: string, tipeLink: string) {
     try {
         useLink.loading = true;
-        const response = await fetch(`/api/getLink/${idBukti}/${tipeLink}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/getLink/${idBukti}/${tipeLink}`,{
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }

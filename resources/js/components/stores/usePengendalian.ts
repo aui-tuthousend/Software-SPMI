@@ -53,7 +53,12 @@ export async function submitPengendalian() {
 export async function fetchPengendalian(jurusan: string, periode: string, currentSheet: string, current: string) {
     // usePengendalian.loading = true;
     try {
-        const response = await fetch(`/api/getPengendalian/${jurusan}/${periode}/${currentSheet}/${current}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/getPengendalian/${jurusan}/${periode}/${currentSheet}/${current}`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
         // console.log(response)
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);

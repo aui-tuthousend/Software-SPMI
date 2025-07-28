@@ -9,7 +9,22 @@ import Login from "./components/views/login.vue";
 import NotFound from "./components/notFound.vue";
 import HomeAdmin from "./components/views/homeAdmin.vue";
 
-const role = await localStorage.getItem("role")
+
+const getRole = async () => {
+    return localStorage.getItem("role")
+}
+
+axios.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +34,7 @@ const router = createRouter({
             name: "Home",
             component: Home,
             beforeEnter: async (to, from, next) => {
+                const role = await getRole();
                 if (role) {
                     if (role === "Admin") {
                         next("/admin/dashboard");
@@ -35,7 +51,7 @@ const router = createRouter({
             name: "Sheet",
             component: Sheet,
             beforeEnter: async (to, from, next) => {
-                
+                const role = await getRole();
                 if (role) {
                     if (role === "Admin") {
                         next("/admin/dashboard");
@@ -52,7 +68,7 @@ const router = createRouter({
             name: "SuperUser",
             component: SuperUser,
             beforeEnter: async (to, from, next) => {
-                
+                const role = await getRole();
                 if (role) {
                     if (role === "Evaluasi") {
                         next();
@@ -68,7 +84,7 @@ const router = createRouter({
             path: "/import",
             component: Importexcel,
             beforeEnter: async (to, from, next) => {
-                
+                const role = await getRole();
                 if (role) {
                     if (role === "Evaluasi") {
                         next();
@@ -84,7 +100,7 @@ const router = createRouter({
             path: "/login",
             component: Login,
             beforeEnter: async (to, from, next) => {
-                
+                const role = await getRole();
                 if (role) {
                     next("/");
                 } else {
@@ -99,7 +115,7 @@ const router = createRouter({
             path: "/register",
             component: Register,
             beforeEnter: async (to, from, next) => {
-                
+                const role = await getRole();
                 if (role) {
                     next("/");
                 } else {
@@ -121,7 +137,7 @@ const router = createRouter({
             path: "/admin/dashboard",
             component: HomeAdmin,
             beforeEnter: async (to, from, next) => {
-                
+                const role = await getRole();
                 if (role) {
                     if (role === "Admin") {
                         next();

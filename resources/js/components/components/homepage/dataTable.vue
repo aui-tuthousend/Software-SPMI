@@ -38,7 +38,11 @@ onMounted(async () => {
     try {
         loading.value = true;
         // await new Promise(resolve => setTimeout(resolve, 10000)); // Simulate a delay of 10 seconds
-        const response = await fetch("/api/getAllSheet");
+        const response = await fetch("/api/getAllSheet", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
         if (response.status === 200) {
             const data = await response.json();
             availableSheets.value = data; // Update available sheets with fetched data

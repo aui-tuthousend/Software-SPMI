@@ -13,7 +13,7 @@ import AccordionContent from 'primevue/accordioncontent';
 const props = defineProps<{
     idBukti: string,
     tipeLink: string,
-    comment: string,
+    comment?: string,
     editor: string,
     pengendalian?: any,
 }>();

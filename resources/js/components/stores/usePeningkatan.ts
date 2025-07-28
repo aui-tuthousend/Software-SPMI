@@ -42,7 +42,12 @@ export async function submitPeningkatan() {
 
 export async function fetchPeningkatan(jurusan: string, periode: string, currentSheet: string, current: string) {
     try {
-        const response = await fetch(`/api/getPeningkatan/${jurusan}/${periode}/${currentSheet}/${current}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/getPeningkatan/${jurusan}/${periode}/${currentSheet}/${current}`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);

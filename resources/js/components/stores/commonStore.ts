@@ -1,4 +1,3 @@
-import { reactive } from 'vue';
 import CryptoJS from "crypto-js";
 
 export function getUserName(): string {

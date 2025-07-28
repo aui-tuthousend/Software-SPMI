@@ -59,7 +59,12 @@ export async function submitEvaluasi() {
 export async function fetchEvaluasi(jurusan: string, periode: string, currentSheet: string, current: string) {
     // useEvaluasi.loading = true;
     try {
-        const response = await fetch(`/api/getEvaluasi/${jurusan}/${periode}/${currentSheet}/${current}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/getEvaluasi/${jurusan}/${periode}/${currentSheet}/${current}`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);

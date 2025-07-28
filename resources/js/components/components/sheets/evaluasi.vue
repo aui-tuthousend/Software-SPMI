@@ -228,7 +228,7 @@ const isChanged = (data: any) => {
                             />
                             <label
                                 for="on_label"
-                                v-if="indicator.komentarEvaluasi"
+                                v-if="indicator.bukti"
                             >Last Edited by: {{indicator.editorPelaksanaan}}</label>
                         </FloatLabel>
                     </div>

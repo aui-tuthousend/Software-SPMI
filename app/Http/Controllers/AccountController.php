@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -57,57 +59,42 @@ class AccountController extends Controller
         ]);
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $credentials = $request->only('email', 'password');
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        try {
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json(['success' => false, 'message' => 'Invalid credentials'], 401);
+            }
+        } catch (JWTException $e) {
+            return response()->json(['success' => false, 'message' => 'Could not create token'], 500);
         }
 
-        $kiey = bin2hex(random_bytes(8));
         $user = Auth::user();
-        $user->tokens()->delete();
-        $token = $user->createToken('authToken')->plainTextToken;
-
-        // Pastikan domain cookie sesuai dengan frontend dan backend
-        $cookie = cookie(
-            'auth_token',
-            $token,
-            60 * 24,
-            '/',
-            null,
-            request()->secure(),
-            true,
-            false,
-            'lax'
-        );
 
         return response()->json([
             'success' => true,
-            'idk' => $kiey,
-            'userRole' => $user->role,
+            'token' => $token,
             'name' => $user->name,
-            'message' => "User {$user->name} successfully logged in"
-        ])->withCookie($cookie);
+            'userRole' => $user->role,
+            'idk' => bin2hex(random_bytes(8))
+        ]);
     }
     
-    public function logout(Request $request): JsonResponse
+    public function logout()
     {
-        // Hapus session Laravel
-        Auth::guard('web')->logout();
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+            return response()->json(['success' => true, 'message' => 'Successfully logged out']);
+        } catch (JWTException $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to logout, please try again.'], 500);
+        }
+    }
 
-        // Hapus semua sesi yang tersimpan
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil logout'
-        ]);
+    public function me()
+    {
+        return response()->json(Auth::user());
     }
 
     public function listUser(): JsonResponse

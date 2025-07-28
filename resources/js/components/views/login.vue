@@ -163,34 +163,32 @@ const login = async (e) => {
     if (e.valid) {
         loading.value = true;
         try {
-            const response = await axios.post(
-                "/api/login",
-                {
-                    email: e.values.email,
-                    password: e.values.password,
-                },
-                // {
-                //     withCredentials: true,
-                // }
-            );
+            const response = await axios.post('/api/login', {
+                email: e.values.email,
+                password: e.values.password,
+            });
 
             loading.value = false;
 
-            const userName = response.data.name;
-            const role = response.data.userRole;
-            const idk = response.data.idk.toString();
+            if (response.data.success) {
+                const token = response.data.token;
+                const userName = response.data.name;
+                const role = response.data.userRole;
+                const idk = response.data.idk.toString();
 
-            const encryptedName = CryptoJS.AES.encrypt(userName, `asx${idk}`).toString();
-            const encryptedRole = CryptoJS.AES.encrypt(role, `ddx${idk}`).toString();
+                const encryptedName = CryptoJS.AES.encrypt(userName, `asx${idk}`).toString();
+                const encryptedRole = CryptoJS.AES.encrypt(role, `ddx${idk}`).toString();
 
-            localStorage.setItem("date", idk);
-            localStorage.setItem("name", encryptedName);
-            localStorage.setItem("userRole", encryptedRole);
-            localStorage.setItem("role", role);
-            localStorage.setItem("toastMessage", "Login Berhasil. Selamat Datang");
-            localStorage.setItem("toastSeverity", "success");
+                localStorage.setItem('token', token);
+                localStorage.setItem("date", idk);
+                localStorage.setItem("name", encryptedName);
+                localStorage.setItem("userRole", encryptedRole);
+                localStorage.setItem("role", role);
+                localStorage.setItem("toastMessage", "Login Berhasil. Selamat Datang");
+                localStorage.setItem("toastSeverity", "success");
 
-            router.push({name: "Home"});
+                await router.push('/');
+            }
         } catch (error) {
             toast.add({
                 severity: "error",

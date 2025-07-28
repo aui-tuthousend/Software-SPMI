@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { Avatar, Menubar } from "primevue";
+import { Avatar, Menubar, Toast, useToast } from "primevue";
 import CryptoJS from "crypto-js";
 import {getUserName, getUserRole} from "../stores/commonStore.js";
 import axios from "axios";
@@ -36,7 +36,7 @@ axios.defaults.withCredentials = true;
 const router = useRouter();
 const user = getUserName();
 const role = getUserRole();
-
+const toast = useToast();
 
 const loading = ref(false);
 const menu = ref(null);
@@ -60,26 +60,28 @@ const profileMenu = computed(() => [
 
 const logout = async () => {
     try {
-        // loading.value = true;
-        // const response = await axios.post(
-        //     "/api/logout",
-        //     {},
-        //     {
-        //         withCredentials: true,
-        //     }
-        // );
-        // loading.value = false;
+        const token = localStorage.getItem('token');
+        await axios.post('/api/logout', {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
 
-        // if (response.data.success) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("userRole");
-            localStorage.removeItem("role");
-            router.push("/login");
-        // } else {
-        //     console.error("Logout failed");
-        // }
-    } catch (error) {
-        console.error("Error during logout:", error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('name');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('role');
+        localStorage.removeItem('date');
+
+        await router.push('/login');
+
+        toast.add({
+            severity: "success",
+            summary: "Logout berhasil.",
+            life: 3000,
+        });
+    } catch (err) {
+        console.error('Logout failed:', err);
     }
 };
 

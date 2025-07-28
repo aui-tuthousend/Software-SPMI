@@ -45,7 +45,12 @@ export async function submitPelaksanaan() {
 
 export async function fetchPelaksanaan(jurusan: string, periode: string, currentSheet: string, current: string) {
     try {
-        const response = await fetch(`/api/getPelaksanaan/${jurusan}/${periode}/${currentSheet}/${current}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/getPelaksanaan/${jurusan}/${periode}/${currentSheet}/${current}`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }

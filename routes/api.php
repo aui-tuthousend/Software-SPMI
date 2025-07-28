@@ -13,14 +13,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PenetapanController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PengendalianController;
+use App\Http\Middleware\JwtMiddleware;
 
-Route::group([], function () {
+Route::group(['middleware' => 'jwt'], function () {
     Route::post('/logout', [AccountController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
     Route::post('/penetapan/import', [PenetapanController::class, 'import']);
-    Route::get('/downloadSheet', [SheetController::class, 'downloadExcel']);
 
     Route::get('/getPelaksanaan/{jurusan}/{periode}/{tipePendidikan}/{tipe}', [PelaksanaanController::class, 'getPelaksanaan']);
     Route::get('/getEvaluasi/{jurusan}/{periode}/{tipePendidikan}/{tipe}', [EvaluasiController::class, 'getEvaluasi']);
@@ -48,6 +48,7 @@ Route::group([], function () {
     Route::post('/api-logs-user', [ApiLogController::class, 'getUserHistory']);
 });
 
+Route::get('/downloadSheet', [SheetController::class, 'downloadExcel']);
 Route::post('/login', [AccountController::class, 'login']);
 Route::post('/register', [AccountController::class, 'register']);
 
