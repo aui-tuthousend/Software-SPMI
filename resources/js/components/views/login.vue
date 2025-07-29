@@ -175,15 +175,17 @@ const login = async (e) => {
                 const userName = response.data.name;
                 const role = response.data.userRole;
                 const idk = response.data.idk.toString();
+                const expiresInMs = 3 * 24 * 60 * 60 * 1000;
+                const expiry = Date.now() + expiresInMs;
 
                 const encryptedName = CryptoJS.AES.encrypt(userName, `asx${idk}`).toString();
                 const encryptedRole = CryptoJS.AES.encrypt(role, `ddx${idk}`).toString();
 
                 localStorage.setItem('token', token);
+                localStorage.setItem('token_expiry', expiry.toString());
                 localStorage.setItem("date", idk);
                 localStorage.setItem("name", encryptedName);
                 localStorage.setItem("userRole", encryptedRole);
-                localStorage.setItem("role", role);
                 localStorage.setItem("toastMessage", "Login Berhasil. Selamat Datang");
                 localStorage.setItem("toastSeverity", "success");
 

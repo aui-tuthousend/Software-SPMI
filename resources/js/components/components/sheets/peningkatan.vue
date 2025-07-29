@@ -51,17 +51,14 @@ const handleSubmitPeningkatan = async (data) => {
     }
 };
 
-const handleReset = (event, data: any) => {
+const handleReset = (event) => {
     confirm.require({
         target: event.currentTarget,
         group: 'headless',
         message: 'Discard your current changes?',
-        accept: () => {
-            data.komenPeningkatan = oldVal.value;
-            data.isUpdate = false;
+        accept: async () => {
+            await fetchPeningkatan(props.jurusan, props.periode, props.tipeSheet, current.value);
             isEditing.value = false;
-            count.value = 0;
-            oldVal.value = '';
             toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Changes discarded', life: 3000 });
         },
         reject: () => {
@@ -69,18 +66,7 @@ const handleReset = (event, data: any) => {
         }
     });
 };
-const handleBlur = () => {
-    if (!isEditing.value) {
-        oldVal.value = ''
-        count.value = 0
-    }
-}
-const handleFocus = (old:string) => {
-    count.value += 1;
-    if (count.value == 1){
-        oldVal.value = old;
-    }
-}
+
 const isChanged = (data: any) => {
     data.isUpdate = true;
     isEditing.value = true;
@@ -280,8 +266,6 @@ const isChanged = (data: any) => {
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiPengendalian"
                       v-model="indicator.komenPeningkatan"
                       @input="isChanged(indicator)"
-                      @focus="handleFocus(indicator.komenPeningkatan)"
-                      @blur="handleBlur"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                             <label
@@ -339,7 +323,7 @@ const isChanged = (data: any) => {
                                 severity="danger"
                                 :disabled="!indicator.isUpdate"
                                 raised
-                                @click="handleReset($event ,indicator)"
+                                @click="handleReset($event)"
                             />
                         </ButtonGroup>
                     </div>

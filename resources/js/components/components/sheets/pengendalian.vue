@@ -24,8 +24,6 @@ const toast = useToast();
 const confirm = useConfirm();
 const loading = ref<boolean>(false);
 const isEditing = ref<boolean>(false);
-const oldVal = ref<string[]>(['', '', '', '']);
-const count = ref<number[]>([0,0,0,0]);
 
 const sheetTypes = ['input', 'proses', 'output'];
 const current = ref<string>(sheetTypes[0]);
@@ -34,8 +32,6 @@ watch([current, tipeSheet], async ()=> {
     loading.value = true;
     await fetchPengendalian(props.jurusan, props.periode, props.tipeSheet, current.value);
     loading.value = false;
-    count.value = [0,0,0,0];
-    oldVal.value = ['', '', '', ''];
 }, {immediate: true})
 
 const handleSubmitPengendalian = async (data) => {
@@ -59,20 +55,14 @@ const handleSubmitPengendalian = async (data) => {
     }
 };
 
-const handleReset = (event, data: any) => {
+const handleReset = (event) => {
     confirm.require({
         target: event.currentTarget,
         group: 'headless',
         message: 'Discard your current changes?',
-        accept: () => {
-            oldVal.value[0] && (data.temuan = oldVal.value[0]);
-            oldVal.value[1] && (data.akarMasalah = oldVal.value[1]);
-            oldVal.value[2] && (data.rtl = oldVal.value[2]);
-            oldVal.value[3] && (data.pelaksanaanRtl = oldVal.value[3]);
-            data.isUpdate = false;
+        accept: async () => {
+            await fetchPengendalian(props.jurusan, props.periode, props.tipeSheet, current.value);
             isEditing.value = false;
-            count.value = [0,0,0,0];
-            oldVal.value = ['', '', '', ''];
             toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Changes discarded', life: 3000 });
         },
         reject: () => {
@@ -80,19 +70,6 @@ const handleReset = (event, data: any) => {
         }
     });
 };
-
-const handleBlur = () => {
-    if (!isEditing.value) {
-        count.value = [0,0,0,0];
-        oldVal.value = ['', '', '', ''];
-    }
-}
-const handleFocus = (old: string, index: number) => {
-    count.value[index] += 1;
-    if (count.value[index] == 1){
-        oldVal.value[index] = old;
-    }
-}
 
 const isChanged = (data: any) => {
     data.isUpdate = true;
@@ -270,8 +247,6 @@ const isChanged = (data: any) => {
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiEvaluasi"
                       v-model="indicator.temuan"
                       @input="isChanged(indicator)"
-                      @focus="handleFocus(indicator.temuan, 0)"
-                      @blur="handleBlur"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -299,8 +274,6 @@ const isChanged = (data: any) => {
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiEvaluasi"
                       v-model="indicator.akarMasalah"
                       @input="isChanged(indicator)"
-                      @focus="handleFocus(indicator.akarMasalah, 1)"
-                      @blur="handleBlur"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -328,8 +301,6 @@ const isChanged = (data: any) => {
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiEvaluasi"
                       v-model="indicator.rtl"
                       @input="isChanged(indicator)"
-                      @focus="handleFocus(indicator.rtl, 2)"
-                      @blur="handleBlur"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -357,8 +328,6 @@ const isChanged = (data: any) => {
                       :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiEvaluasi"
                       v-model="indicator.pelaksanaanRtl"
                       @input="isChanged(indicator)"
-                      @focus="handleFocus(indicator.pelaksanaanRtl, 3)"
-                      @blur="handleBlur"
                       style="resize: none; height: 9rem; width: 20rem"
                   />
                   <label
@@ -415,7 +384,7 @@ const isChanged = (data: any) => {
                           severity="danger"
                           raised
                           :disabled="!indicator.isUpdate"
-                          @click="handleReset($event ,indicator)"
+                          @click="handleReset($event)"
                       />
                   </ButtonGroup>
               </div>

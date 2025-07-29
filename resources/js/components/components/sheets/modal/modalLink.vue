@@ -103,6 +103,10 @@ const handleInitial = (data?: any) => {
 
 }
 
+const isSameRole = () => {
+    return props.role == props.tipeLink
+}
+
 const openLink = (link) => {
     window.open(link, "_blank")
 }
@@ -197,7 +201,7 @@ onClickOutside(modal, () => {
                                                 icon="pi pi-pen-to-square"
                                                 severity="info"
                                                 raised
-                                                :disabled="useLink.loading || !props.role == props.tipeLink"
+                                                :disabled="useLink.loading || !isSameRole()"
                                                 @click="handleInitial(data)"
                                             />
                                             <Button
@@ -205,7 +209,7 @@ onClickOutside(modal, () => {
                                                 icon="pi pi-trash"
                                                 severity="danger"
                                                 raised
-                                                :disabled="useLink.loading || !props.role == props.tipeLink"
+                                                :disabled="useLink.loading || !isSameRole()"
                                                 @click="handleDeleteLink($event, data?.id!)"
                                             />
                                         </ButtonGroup>

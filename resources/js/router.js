@@ -8,22 +8,24 @@ import Register from "./components/views/register.vue";
 import Login from "./components/views/login.vue";
 import NotFound from "./components/notFound.vue";
 import HomeAdmin from "./components/views/homeAdmin.vue";
+import { getUserRole } from "./components/stores/commonStore";
 
 
 const getRole = async () => {
-    return localStorage.getItem("role")
+    const token = localStorage.getItem('token');
+    const expiry = localStorage.getItem('token_expiry');
+    if (token && expiry && Date.now() < parseInt(expiry)) {
+        return getUserRole();
+    } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('token_expiry');
+        localStorage.removeItem('name');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('date');
+        return null;
+    }
 }
 
-axios.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
 
 
 const router = createRouter({

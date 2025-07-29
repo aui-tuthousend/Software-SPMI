@@ -68,9 +68,9 @@ const logout = async () => {
         });
 
         localStorage.removeItem('token');
+        localStorage.removeItem('token_expiry');
         localStorage.removeItem('name');
         localStorage.removeItem('userRole');
-        localStorage.removeItem('role');
         localStorage.removeItem('date');
 
         await router.push('/login');

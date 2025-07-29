@@ -1,6 +1,6 @@
 import CryptoJS from "crypto-js";
 
-export function getUserName(): string {
+export function getUserName() {
     const encryptedName = localStorage.getItem("name");
     const key = localStorage.getItem("date");
     if (encryptedName) {
@@ -8,9 +8,11 @@ export function getUserName(): string {
 
         return nameBytes.toString(CryptoJS.enc.Utf8);
     }
+
+    return ""
 }
 
-export function getUserRole(): string {
+export function getUserRole() {
     const encryptedRole = localStorage.getItem("userRole");
     const key = localStorage.getItem("date");
     if (encryptedRole) {

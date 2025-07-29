@@ -21,8 +21,6 @@ const confirm = useConfirm();
 const loading = ref<boolean>(false);
 const isEditing = ref<boolean>(false);
 const adjusmentOptions = ref<string[]>(['melampaui', 'mencapai', 'belum mencapai', 'menyimpang']);
-const oldVal = ref<string[]>(['','','']);
-const count = ref<number[]>([0,0,0]);
 
 const sheetTypes = ['input', 'proses', 'output'];
 const current = ref<string>(sheetTypes[0]);
@@ -31,8 +29,6 @@ watch([current, tipeSheet], async ()=> {
     loading.value = true;
     await fetchEvaluasi(props.jurusan, props.periode, props.tipeSheet, current.value);
     loading.value = false;
-    oldVal.value = ['','',''];
-    count.value = [0,0,0];
 }, {immediate: true})
 
 
@@ -57,19 +53,15 @@ const handleSubmitEvaluasi = async (data) => {
     }
 };
 
-const handleReset = (event, data: any) => {
+const handleReset = (event) => {
     confirm.require({
         target: event.currentTarget,
         group: 'headless',
         message: 'Discard your current changes?',
-        accept: () => {
-            oldVal.value[0] && (data.indicator = oldVal.value[0]);
-            oldVal.value[1] && (data.komentarEvaluasi = oldVal.value[1]);
-            oldVal.value[2] && (data.adjusment = oldVal.value[2]);
-            data.isUpdate = false;
+        accept: async () => {
+            await fetchEvaluasi(props.jurusan, props.periode, props.tipeSheet, current.value);
+            // data.isUpdate = false;
             isEditing.value = false;
-            oldVal.value = ['','',''];
-            count.value = [0,0,0];
             toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Changes discarded', life: 3000 });
         },
         reject: () => {
@@ -77,19 +69,6 @@ const handleReset = (event, data: any) => {
         }
     });
 };
-
-const handleBlur = () => {
-    if (!isEditing.value) {
-        oldVal.value = ['','',''];
-        count.value = [0,0,0];
-    }
-}
-const handleFocus = (old: string, index: number) => {
-    count.value[index] += 1;
-    if (count.value[index] == 1){
-        oldVal.value[index] = old;
-    }
-}
 
 const isChanged = (data: any) => {
     data.isUpdate = true;
@@ -183,11 +162,10 @@ const isChanged = (data: any) => {
                         class="h-[10rem] w-[20rem] flex items-center justify-center"
                     >
                         <Textarea
-                            :disabled="isEditing && !indicator.isUpdate"
+                            class="custom-textarea"
+                            disabled
                             v-model="indicator.indicator"
-                            @focus="handleFocus(indicator.indicator, 0)"
                             @input="isChanged(indicator)"
-                            @blur="handleBlur"
                             style="resize: none; height: 9rem; width: 100%;"
                         />
                     </span>
@@ -272,9 +250,6 @@ const isChanged = (data: any) => {
                                 :disabled="isEditing && !indicator.isUpdate || !indicator.idBuktiPelaksanaan"
                                 v-model="indicator.komentarEvaluasi"
                                 @input="isChanged(indicator)"
-                                @focus="handleFocus(indicator.komentarEvaluasi, 1)"
-                                @blur="handleBlur"
-
                                 style="resize: none; height: 9rem; width: 20rem"
                             />
                             <label
@@ -303,8 +278,6 @@ const isChanged = (data: any) => {
                             :options="adjusmentOptions"
                             v-model="indicator.adjusment"
                             @change="isChanged(indicator)"
-                            @focus="handleFocus(indicator.adjusment, 2)"
-                            @blur="handleBlur"
                             checkmark :highlightOnSelect="false"
                         />
                     </div>
@@ -355,7 +328,7 @@ const isChanged = (data: any) => {
                                 severity="danger"
                                 raised
                                 :disabled="!indicator.isUpdate"
-                                @click="handleReset($event ,indicator)"
+                                @click="handleReset($event)"
                             />
                         </ButtonGroup>
                     </div>
